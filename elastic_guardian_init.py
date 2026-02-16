@@ -38,4 +38,4 @@ __all__ = [
 # Package metadata
 __author__ = "Elastic-Guardian X Team"
 __license__ = "Apache 2.0"
-__copyright__ = "Copyright 2024 Elastic-Guardian X Team"
+__copyright__ = "Copyright 2026 Elastic-Guardian X Team"
