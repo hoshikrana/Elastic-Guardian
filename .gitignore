@@ -1,0 +1,172 @@
+# Elastic-Guardian X .gitignore
+
+# ============================================================================
+# Python
+# ============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# ============================================================================
+# PyTorch & ML
+# ============================================================================
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+checkpoints/
+model_outputs/
+runs/
+tensorboard_logs/
+wandb/
+
+# Training outputs
+logs/
+outputs/
+results/
+*.log
+
+# Data
+data/
+datasets/
+*.csv
+*.jsonl
+*.parquet
+*.arrow
+
+# Model files (too large for git)
+*.bin
+*.h5
+*.onnx
+*.pb
+
+# ============================================================================
+# Testing & Coverage
+# ============================================================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# ============================================================================
+# IDEs
+# ============================================================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================================================
+# OS
+# ============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.directory
+
+# ============================================================================
+# Development Tools
+# ============================================================================
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ruff
+.ruff_cache/
+
+# black
+.black_cache/
+
+# Documentation builds
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# ============================================================================
+# Project Specific
+# ============================================================================
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.bak
+*.swp
+
+# Secrets (never commit!)
+.env
+.env.local
+secrets.yaml
+*.key
+*.pem
+
+# Experiment tracking
+mlruns/
+.mlflow/
+
+# Compiled configs
+*.pyc
+
+# Large files
+*.tar
+*.tar.gz
+*.zip
+*.rar
+
+# Slurm outputs
+slurm-*.out
+*.slurm
