@@ -1,0 +1,25 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  json:
+    format: '%(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: json
+    stream: ext://sys.stdout
+  file:
+    class: logging.handlers.RotatingFileHandler
+    formatter: json
+    filename: egx.log
+    maxBytes: 52428800
+    backupCount: 3
+    encoding: utf-8
+loggers:
+  egx:
+    level: INFO
+    handlers: [console, file]
+    propagate: false
+root:
+  level: WARNING
+  handlers: [console]

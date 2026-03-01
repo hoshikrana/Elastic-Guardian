@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "egx"
+version = "0.1.0"
+description = "Elastic Guardian X — Intelligent Adaptive Training Runtime"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+keywords = ["machine-learning", "training", "gpu", "adaptive", "lora", "qlora"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.1.0",
+    "pynvml>=11.5.0",
+    "pydantic>=2.0.0",
+    "click>=8.1.0",
+    "pyyaml>=6.0",
+    "structlog>=23.0.0",
+    "bitsandbytes>=0.41.0",
+    "safetensors>=0.4.0",
+]
+
+[project.optional-dependencies]
+dev   = [
+    "pytest>=7.4", "pytest-cov>=4.1", "pytest-benchmark>=4.0",
+    "pytest-timeout>=2.2", "mypy>=1.7", "ruff>=0.1",
+    "black>=23.0", "hypothesis>=6.0",
+]
+flash = ["flash-attn>=2.3.0"]
+onnx  = ["onnx>=1.15.0", "onnxruntime>=1.16.0"]
+api   = ["fastapi>=0.100", "uvicorn>=0.24"]
+all   = ["egx[flash,onnx,api]"]
+
+[project.urls]
+Repository = "https://github.com/hoshikrana/Elastic-Guardian"
+
+[project.scripts]
+egx = "egx.cli.main:main"
+
+[tool.mypy]
+strict = true
+disallow_any_explicit = true
+warn_return_any = true
+warn_unused_ignores = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short --timeout=120"
+markers = [
+    "gpu: requires CUDA GPU",
+    "slow: takes more than 30s",
+    "benchmark: performance benchmarks",
+]

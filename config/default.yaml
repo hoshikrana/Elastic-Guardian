@@ -1,0 +1,82 @@
+# EGX default configuration — Trie-resolved by runtime/config_loader.py
+
+intelligence:
+  estimator:
+    analytical:
+      safety_thresholds:
+        full_finetune: 0.72
+        lora_plus:     0.80
+        lora:          0.80
+        dora:          0.82
+        qlora:         0.90
+    hybrid:
+      dryrun_weight:        0.70
+      analytical_weight:    0.30
+      dryrun_timeout_s:     45.0
+      confidence_threshold: 0.85
+    calibration:
+      max_cache_size: 1024
+      retention_days: 90
+  strategy:
+    scoring_weights:
+      memory_safety:    0.40
+      training_speed:   0.25
+      param_efficiency: 0.20
+      user_preference:  0.15
+    batch_search:
+      low: 1
+      high: 512
+
+orchestration:
+  pressure:
+    poll_interval_s: 1.0
+    thresholds:
+      green:     0.72
+      yellow:    0.85
+      orange:    0.92
+      red:       0.97
+      emergency: 0.99
+  elastic_batch:
+    stability_window: 3
+    growth_phase1:    1.05
+    growth_phase2:    1.10
+
+resilience:
+  watchdog:
+    heartbeat_timeout_s: 30.0
+  recovery:
+    max_oom_retries:      5
+    max_nan_retries:      10
+    max_inf_retries:      5
+    max_deadlock_retries: 3
+  checkpoint:
+    strategy:          adaptive
+    time_interval_min: 30
+    step_interval:     500
+    keep_top_n_loss:   2
+    keep_last_n_time:  2
+
+models:
+  auto_detect:
+    fallback_to_heuristics: true
+    log_detected_targets:   true
+
+export:
+  default_format:          safetensors
+  lora_merge_before_export: true
+  onnx:
+    opset_version: 17
+    dynamic_axes:  true
+
+monitoring:
+  telemetry:
+    enabled: false
+  metrics:
+    log_every_n_steps: 10
+  anomaly:
+    loss_spike_sigma: 3.0
+    grad_norm_sigma:  4.0
+
+data:
+  prefetch_factor: 2
+  num_workers:     4

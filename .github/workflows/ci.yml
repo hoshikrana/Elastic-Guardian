@@ -1,0 +1,56 @@
+name: EGX CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -e ".[dev]"
+      - run: black --check egx/
+      - run: ruff check egx/
+      - run: mypy --strict egx/
+      - run: python -c "import egx; print('v' + egx.__version__)"
+
+  test-unit:
+    name: Unit + DSA Tests
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -e ".[dev]"
+      - run: pytest tests/unit/dsa/ -v --tb=short
+        name: DSA tests (100% required)
+      - run: pytest tests/unit/ --cov=egx --cov-fail-under=85
+        name: All unit tests (>=85% coverage)
+
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: test-unit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -e ".[dev]"
+      - run: pytest tests/integration/ -v
+
+  gpu-validation:
+    name: GPU Validation (main only)
+    runs-on: [self-hosted, gpu]
+    needs: test-integration
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -e ".[dev,flash]"
+      - run: pytest tests/gpu_validation/ -v -m gpu
