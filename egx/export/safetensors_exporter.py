@@ -44,6 +44,7 @@ class SafeTensorsExporter(BaseExporter):
     def validate(self, output_path: Path) -> bool:
         try:
             from safetensors import safe_open
+
             with safe_open(str(output_path), framework="pt") as f:
                 keys = f.keys()
                 logger.info(f"SafeTensors validation passed: {len(keys)} tensors")

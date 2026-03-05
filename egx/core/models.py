@@ -13,17 +13,23 @@ from dataclasses import dataclass, field
 from typing import Optional, Tuple
 
 from .enums import (
-    HardwareTier, InterconnectType, MemoryTier, DType, TrainingMode,
-    ParallelStrategy, OptimizerType, EstimationMethod, ArchType
+    HardwareTier,
+    InterconnectType,
+    MemoryTier,
+    DType,
+    TrainingMode,
+    ParallelStrategy,
+    OptimizerType,
+    EstimationMethod,
+    ArchType,
 )
-
 
 
 @dataclass(frozen=True, slots=True)
 class GPUSpec:
     device_id: int
     name: str
-    vram_bytes: int # bytes ONLY (Law 10)
+    vram_bytes: int  # bytes ONLY (Law 10)
     compute_capability: Tuple[int, int]
     memory_bandwidth_gbps: float
     fp16_tflops: float
@@ -31,7 +37,7 @@ class GPUSpec:
     supports_flash_attn2: bool
     supports_fp8: bool
     nvlink_peer_ids: Tuple[int, ...]
-    vendor: str = "nvidia" # nvidia, apple, intel
+    vendor: str = "nvidia"  # nvidia, apple, intel
 
     @property
     def vram_gb(self) -> float:
@@ -40,9 +46,12 @@ class GPUSpec:
     @property
     def tier(self) -> HardwareTier:
         gb = self.vram_gb
-        if gb <= 12: return HardwareTier.LAPTOP
-        if gb <= 48: return HardwareTier.WORKSTATION
-        if gb <= 80: return HardwareTier.PROSUMER
+        if gb <= 12:
+            return HardwareTier.LAPTOP
+        if gb <= 48:
+            return HardwareTier.WORKSTATION
+        if gb <= 80:
+            return HardwareTier.PROSUMER
         return HardwareTier.DATACENTER
 
 
@@ -69,7 +78,8 @@ class HardwareTopology:
 
     @property
     def hardware_tier(self) -> HardwareTier:
-        if not self.gpus: return HardwareTier.LAPTOP
+        if not self.gpus:
+            return HardwareTier.LAPTOP
         # Returns highest tier in topology
         return max(g.tier for g in self.gpus)
 
@@ -104,10 +114,11 @@ class MemoryReport:
 
     def __add__(self, other: MemoryReport) -> MemoryReport:
         from .exceptions import MemoryOverflowError
+
         total = self.total_bytes + other.total_bytes
         if total > sys.maxsize:
             raise MemoryOverflowError(total, sys.maxsize)
-        
+
         return MemoryReport(
             weights_bytes=self.weights_bytes + other.weights_bytes,
             activations_bytes=self.activations_bytes + other.activations_bytes,
@@ -117,7 +128,7 @@ class MemoryReport:
             total_bytes=total,
             method=self.method,
             confidence=min(self.confidence, other.confidence),
-            error_bound_pct=max(self.error_bound_pct, other.error_bound_pct)
+            error_bound_pct=max(self.error_bound_pct, other.error_bound_pct),
         )
 
 

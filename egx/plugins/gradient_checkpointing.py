@@ -50,7 +50,9 @@ class GradientCheckpointingPlugin:
 
         def checkpointed_forward(*args, **kwargs):
             if torch.is_grad_enabled():
-                return checkpoint(original_forward, *args, use_reentrant=False, **kwargs)
+                return checkpoint(
+                    original_forward, *args, use_reentrant=False, **kwargs
+                )
             return original_forward(*args, **kwargs)
 
         block.forward = checkpointed_forward

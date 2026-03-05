@@ -4,6 +4,7 @@ EGX Hardware Simulator — Testing Utility.
 Mocks hardware capabilities for core logic verification.
 Uses v1.0 definitive contracts (GPUSpec, HardwareTopology).
 """
+
 from __future__ import annotations
 
 from egx.core.enums import InterconnectType
@@ -22,9 +23,9 @@ def mock_8gb_gpu() -> HardwareTopology:
         bf16_tflops=20.3,
         supports_flash_attn2=True,
         supports_fp8=False,
-        nvlink_peer_ids=()
+        nvlink_peer_ids=(),
     )
-    
+
     return HardwareTopology(
         gpus=(gpu,),
         cpu_cores=8,
@@ -35,7 +36,7 @@ def mock_8gb_gpu() -> HardwareTopology:
         pcie_bandwidth_gbps=15.8,
         gpu_interconnect_gbps=15.8,
         interconnect=InterconnectType.PCIE,
-        node_count=1
+        node_count=1,
     )
 
 
@@ -52,10 +53,11 @@ def mock_h100_cluster() -> HardwareTopology:
             bf16_tflops=989.0,
             supports_flash_attn2=True,
             supports_fp8=True,
-            nvlink_peer_ids=(1 - i,)
-        ) for i in range(2)
+            nvlink_peer_ids=(1 - i,),
+        )
+        for i in range(2)
     )
-    
+
     return HardwareTopology(
         gpus=gpus,
         cpu_cores=64,
@@ -66,5 +68,5 @@ def mock_h100_cluster() -> HardwareTopology:
         pcie_bandwidth_gbps=63.0,
         gpu_interconnect_gbps=900.0,
         interconnect=InterconnectType.NVLINK,
-        node_count=1
+        node_count=1,
     )

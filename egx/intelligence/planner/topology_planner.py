@@ -26,24 +26,32 @@ class TopologyPlanner:
         num_gpus = len(topo.gpus)
 
         if num_gpus <= 1:
-            return ParallelismPlan("single", 1, 1, "Single GPU — no parallelism needed.")
+            return ParallelismPlan(
+                "single", 1, 1, "Single GPU — no parallelism needed."
+            )
 
         per_gpu = topo.gpus[0].vram_bytes if topo.gpus else 0
         fits_single = model_bytes < int(per_gpu * 0.7)
 
         if fits_single:
             return ParallelismPlan(
-                "dp", num_gpus, 1,
-                f"Model fits in single GPU. Using DataParallel across {num_gpus} GPUs."
+                "dp",
+                num_gpus,
+                1,
+                f"Model fits in single GPU. Using DataParallel across {num_gpus} GPUs.",
             )
 
         if topo.interconnect == InterconnectType.NVLINK:
             return ParallelismPlan(
-                "fsdp", num_gpus, num_gpus,
-                f"NVLink detected. Using FSDP with {num_gpus}-way sharding."
+                "fsdp",
+                num_gpus,
+                num_gpus,
+                f"NVLink detected. Using FSDP with {num_gpus}-way sharding.",
             )
 
         return ParallelismPlan(
-            "pipeline", num_gpus, num_gpus,
-            f"PCIe interconnect. Using Pipeline Parallelism across {num_gpus} GPUs."
+            "pipeline",
+            num_gpus,
+            num_gpus,
+            f"PCIe interconnect. Using Pipeline Parallelism across {num_gpus} GPUs.",
         )

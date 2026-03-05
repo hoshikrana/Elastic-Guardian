@@ -24,7 +24,7 @@ class CPUOffloadPlugin:
         Moves all optimizer states to CPU.
         """
         for group in optimizer.param_groups:
-            for p in group['params']:
+            for p in group["params"]:
                 state = optimizer.state[p]
                 for k, v in state.items():
                     if isinstance(v, torch.Tensor):

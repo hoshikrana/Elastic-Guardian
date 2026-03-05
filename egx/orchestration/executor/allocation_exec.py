@@ -17,7 +17,9 @@ logger = logging.getLogger("egx.orchestration.executor")
 class AllocationExecutor:
     """Moves tensors between VRAM, RAM, and NVMe according to the plan."""
 
-    def execute(self, model: nn.Module, plan_vram: List[str], plan_ram: List[str]) -> None:
+    def execute(
+        self, model: nn.Module, plan_vram: List[str], plan_ram: List[str]
+    ) -> None:
         """Place model parameters according to the allocation plan."""
         for name, param in model.named_parameters():
             if self._matches(name, plan_ram):

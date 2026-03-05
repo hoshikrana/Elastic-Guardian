@@ -13,33 +13,35 @@ import pathlib
 from typing import Any, Dict
 from egx.core.exceptions import CheckpointCorruptError
 
-
 logger = logging.getLogger("egx.resilience.checkpoint")
+
 
 class CheckpointReader:
     """
     Law 1: Atomic checkpointing.
     Verify SHA256 before any weights enter VRAM.
     """
-    
+
     def load(self, path: str) -> Dict[str, Any]:
         path_obj = pathlib.Path(path)
         sha_path = path_obj.with_suffix(".sha256")
-        
+
         if not path_obj.exists():
             raise FileNotFoundError(f"Checkpoint not found: {path}")
-            
+
         # 1. Verify Checksum
         if sha_path.exists():
             expected_sha = sha_path.read_text().strip()
             actual_sha = self._compute_sha256(path_obj)
-            
+
             if expected_sha != actual_sha:
                 logger.error(f"CORRUPTION DETECTED: {path}")
                 raise CheckpointCorruptError(path=path)
         else:
-            logger.warning(f"No SHA256 sidecar found for {path}. Skipping verification.")
-            
+            logger.warning(
+                f"No SHA256 sidecar found for {path}. Skipping verification."
+            )
+
         # 2. Load
         try:
             return torch.load(path, map_location="cpu")

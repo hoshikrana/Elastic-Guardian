@@ -10,7 +10,6 @@ from __future__ import annotations
 from typing import Union
 from egx.core.memory.validators import StandardMemoryValidator
 
-
 KB = 1024
 MB = 1024 * 1024
 GB = 1024 * 1024 * 1024

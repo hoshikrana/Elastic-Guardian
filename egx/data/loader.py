@@ -19,14 +19,14 @@ class NVMeDataLoader(DataLoader):
     EGX Optimized DataLoader.
     Adapts concurrency to CPU core count and storage bandwidth.
     """
-    
+
     def __init__(
         self,
         dataset: Union[Dataset, IterableDataset],
         batch_size: int = 1,
         shuffle: bool = False,
         topology: Optional[HardwareTopology] = None,
-        **kwargs
+        **kwargs,
     ):
         # 1. Hardware-Aware Worker Selection
         cpu_count = multiprocessing.cpu_count()
@@ -35,13 +35,13 @@ class NVMeDataLoader(DataLoader):
             suggested_workers = max(1, min(gpu_count * 2, cpu_count // 4))
         else:
             suggested_workers = max(1, cpu_count // 4)
-            
+
         num_workers = kwargs.pop("num_workers", suggested_workers)
-        
+
         # 2. Performance Flags
         pin_memory = kwargs.pop("pin_memory", True)
         prefetch_factor = kwargs.pop("prefetch_factor", 2)
-        
+
         # 3. NVMe Optimization
         if topology and topology.nvme_seq_read_gbps > 2.0:
             prefetch_factor = max(prefetch_factor, 4)
@@ -53,7 +53,7 @@ class NVMeDataLoader(DataLoader):
             num_workers=num_workers,
             pin_memory=pin_memory,
             prefetch_factor=prefetch_factor if num_workers > 0 else None,
-            **kwargs
+            **kwargs,
         )
-        
+
         self.topology = topology

@@ -57,7 +57,9 @@ class LoRALinear(nn.Module):
         return self.lora_A.numel() + self.lora_B.numel()
 
 
-def inject_lora(model: nn.Module, rank: int = 16, alpha: int = 32, targets: Optional[list] = None) -> nn.Module:
+def inject_lora(
+    model: nn.Module, rank: int = 16, alpha: int = 32, targets: Optional[list] = None
+) -> nn.Module:
     """Inject LoRA adapters into target Linear layers."""
     target_names = targets or ["q_proj", "v_proj", "k_proj", "o_proj"]
     count = 0

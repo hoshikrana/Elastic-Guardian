@@ -11,9 +11,7 @@ from typing import Callable
 
 
 def find_max_batch_size(
-    predicate: Callable[[int], bool],
-    low: int = 1,
-    high: int = 2048
+    predicate: Callable[[int], bool], low: int = 1, high: int = 2048
 ) -> int:
     """
     Law 11: Binary Search on monotone predicate.
@@ -21,12 +19,13 @@ def find_max_batch_size(
     result = low
     while low <= high:
         mid = (low + high) >> 1
-        if mid == 0: break
-        
+        if mid == 0:
+            break
+
         if predicate(mid):
             result = mid
             low = mid + 1
         else:
             high = mid - 1
-            
+
     return result

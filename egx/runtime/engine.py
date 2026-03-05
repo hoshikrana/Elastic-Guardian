@@ -41,7 +41,7 @@ class EGXEngine:
 
         # Phase 1: Hardware Enumeration
         gpus = GPUProber().probe()
-        
+
         # Phase 2: Topology Assembly
         self._topology = TopologyBuilder().build(gpus)
         logger.debug(f"Topology detected: {len(self._topology.gpus)} GPUs")
@@ -53,7 +53,7 @@ class EGXEngine:
         else:
             param_count = 0
             logger.warning("Model does not expose .parameters(). Profiling as 0-param.")
-        
+
         logger.debug(f"Model Introspection: {param_count} parameters")
 
         # Phase 4: Capability Mapping
@@ -67,7 +67,7 @@ class EGXEngine:
         dataset: Any,
         eval_dataset: Optional[Any],
         config: Any,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Executes Execution Phases 5-10.
@@ -84,15 +84,13 @@ class EGXEngine:
 
         # Phase 6: Contract Finalization (TrainingPlan)
         # (Simplified for v1.0)
-        
+
         # Phase 7: PEFT Injection
         model = inject_lora(model)
 
         # Phase 8: Functional Init (Kernel Setup)
         self._kernel = TrainingKernel(
-            model=model,
-            optimizer_type="adamw",
-            learning_rate=config.learning_rate
+            model=model, optimizer_type="adamw", learning_rate=config.learning_rate
         )
 
         # Phase 9: Elastic Loop Execution
@@ -108,7 +106,7 @@ class EGXEngine:
             "success": True,
             "final_loss": final_loss,
             "mode": selected_mode,
-            "topology": self._topology
+            "topology": self._topology,
         }
 
     @property

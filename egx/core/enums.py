@@ -17,9 +17,9 @@ class DeviceType(str, Enum):
 
 
 class HardwareTier(str, Enum):
-    LAPTOP = "laptop"          # ≤ 12GB
-    WORKSTATION = "workstation" # ≤ 48GB
-    PROSUMER = "prosumer"      # ≤ 80GB
+    LAPTOP = "laptop"  # ≤ 12GB
+    WORKSTATION = "workstation"  # ≤ 48GB
+    PROSUMER = "prosumer"  # ≤ 80GB
     DATACENTER = "datacenter"
     CLUSTER = "cluster"
 
@@ -70,7 +70,7 @@ class DType(str, Enum):
             DType.FP16: 2,
             DType.BF16: 2,
             DType.INT8: 1,
-            DType.INT4: 1, # Technically 0.5 but for alignment usually 1
+            DType.INT4: 1,  # Technically 0.5 but for alignment usually 1
         }
         return mapping[self]
 

@@ -14,7 +14,7 @@ class PluginRegistry:
     """
     Registry for hardware-specific plugins (FlashAttn, ZeRO, etc.)
     """
-    
+
     _plugins: Dict[str, Any] = {}
 
     @classmethod
@@ -33,4 +33,4 @@ class PluginRegistry:
             if hasattr(plugin, "is_supported") and plugin.is_supported():
                 logging.info(f"Plugin: Activating {name}...")
                 if hasattr(plugin, "apply"):
-                    plugin.apply(None) # Context passed if needed
+                    plugin.apply(None)  # Context passed if needed

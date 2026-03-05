@@ -67,6 +67,7 @@ class ONNXExporter(BaseExporter):
     def validate(self, output_path: Path) -> bool:
         try:
             import onnx
+
             model = onnx.load(str(output_path))
             onnx.checker.check_model(model)
             logger.info(f"ONNX validation passed: {output_path}")

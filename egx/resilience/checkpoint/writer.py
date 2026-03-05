@@ -12,37 +12,37 @@ import logging
 import pathlib
 from typing import Any, Dict
 
-
 logger = logging.getLogger("egx.resilience.checkpoint")
+
 
 class CheckpointWriter:
     """
     Law 1: Atomic checkpointing.
     write to .tmp -> fsync -> rename.
     """
-    
+
     def save(self, data: Dict[str, Any], path: str):
         path_obj = pathlib.Path(path)
         tmp_path = path_obj.with_suffix(".tmp")
-        
+
         try:
             # 1. Save to temporary file
             torch.save(data, tmp_path)
-            
+
             # 2. Compute SHA256
             sha256 = self._compute_sha256(tmp_path)
-            
+
             # 3. Write SHA256 sidecar
             with open(path_obj.with_suffix(".sha256"), "w") as f:
                 f.write(sha256)
-                
+
             # 4. Atomic Rename
             if path_obj.exists():
                 path_obj.unlink()
             tmp_path.rename(path_obj)
-            
+
             logger.info(f"Atomic checkpoint saved: {path} (SHA: {sha256[:8]})")
-            
+
         except Exception as e:
             logger.error(f"Checkpoint save failed: {e}")
             if tmp_path.exists():

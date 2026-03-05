@@ -1,7 +1,7 @@
 """
 EGX Memory Swapper Hub — Layer 4.
 
-High-level coordinator for bidirectional tensor movement between 
+High-level coordinator for bidirectional tensor movement between
 VRAM (GPU), RAM (CPU), and NVMe (Disk).
 """
 

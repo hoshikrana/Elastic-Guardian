@@ -31,14 +31,16 @@ class LifecycleManager:
     """
     Enforces the 10-phase execution mandate.
     """
-    
+
     def __init__(self):
         self.current_phase = LifecyclePhase.PROBE
         self.completed_phases: List[LifecyclePhase] = []
 
     def transition_to(self, phase: LifecyclePhase):
         """Validated phase transition."""
-        logger.debug(f"Lifecycle: Transitioning from {self.current_phase.name} -> {phase.name}")
+        logger.debug(
+            f"Lifecycle: Transitioning from {self.current_phase.name} -> {phase.name}"
+        )
         self.completed_phases.append(self.current_phase)
         self.current_phase = phase
 
@@ -47,5 +49,6 @@ class LifecycleManager:
         # Simple linear progression check
         phases = list(LifecyclePhase)
         idx = phases.index(phase)
-        if idx == 0: return True
-        return phases[idx-1] in self.completed_phases
+        if idx == 0:
+            return True
+        return phases[idx - 1] in self.completed_phases

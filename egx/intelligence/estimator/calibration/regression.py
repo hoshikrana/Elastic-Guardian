@@ -43,7 +43,7 @@ class CalibrationRegression:
     def _refit(self) -> None:
         if self._n < 2:
             return
-        denom = self._n * self._sum_xx - self._sum_x ** 2
+        denom = self._n * self._sum_xx - self._sum_x**2
         if abs(denom) < 1e-12:
             return
         self.slope = (self._n * self._sum_xy - self._sum_x * self._sum_y) / denom

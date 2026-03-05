@@ -12,15 +12,15 @@ import logging
 from typing import Optional
 from egx.core.exceptions import DeadlockError
 
-
 logger = logging.getLogger("egx.resilience.watchdog")
+
 
 class TrainingWatchdog:
     """
     Law 2: No global mutable state.
     Law 3: Dependency injection.
     """
-    
+
     def __init__(self, timeout_s: float = 30.0):
         self.timeout_s = timeout_s
         self._last_heartbeat = time.monotonic()
@@ -55,5 +55,5 @@ class TrainingWatchdog:
                 # but since it's in a thread, we might need a callback or signal.
                 # For this implementation, we log and can be queried.
                 raise DeadlockError(timeout_s=elapsed, last_step=self._last_step)
-            
+
             time.sleep(1.0)

@@ -18,7 +18,7 @@ class Color(enum.Enum):
 
 class RBNode:
     __slots__ = ("key", "value", "color", "left", "right", "parent")
-    
+
     def __init__(self, key: Any, value: Any, color: Color = Color.RED):
         self.key = key
         self.value = value
@@ -32,7 +32,7 @@ class RedBlackTree:
     """
     Law 11: Calibration store with O(log n) range capability.
     """
-    
+
     def __init__(self):
         self.nil = RBNode(None, None, Color.BLACK)
         self.root = self.nil
@@ -41,7 +41,7 @@ class RedBlackTree:
         node = RBNode(key, value)
         node.left = self.nil
         node.right = self.nil
-        
+
         y = None
         x = self.root
         while x != self.nil:
@@ -50,7 +50,7 @@ class RedBlackTree:
                 x = x.left
             else:
                 x = x.right
-        
+
         node.parent = y
         if y is None:
             self.root = node
@@ -58,33 +58,39 @@ class RedBlackTree:
             y.left = node
         else:
             y.right = node
-            
+
         self._insert_fixup(node)
 
     def search(self, key: Any) -> Optional[Any]:
         curr = self.root
         while curr != self.nil:
-            if key == curr.key: return curr.value
-            if key < curr.key: curr = curr.left
-            else: curr = curr.right
+            if key == curr.key:
+                return curr.value
+            if key < curr.key:
+                curr = curr.left
+            else:
+                curr = curr.right
         return None
 
     def find_nearest(self, key: Any) -> Optional[Tuple[Any, Any]]:
         """Finds the node with key closest to the target."""
         best_node = None
-        min_diff = float('inf')
-        
+        min_diff = float("inf")
+
         curr = self.root
         while curr != self.nil:
             diff = abs(curr.key - key)
             if diff < min_diff:
                 min_diff = diff
                 best_node = curr
-            
-            if key == curr.key: break
-            if key < curr.key: curr = curr.left
-            else: curr = curr.right
-            
+
+            if key == curr.key:
+                break
+            if key < curr.key:
+                curr = curr.left
+            else:
+                curr = curr.right
+
         return (best_node.key, best_node.value) if best_node else None
 
     def _insert_fixup(self, z: RBNode):

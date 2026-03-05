@@ -49,8 +49,10 @@ class EGXTrainer:
         Executes the 10-phase definitive lifecycle.
         """
         try:
-            logger.info(f"EGX v1.0: Starting training session for {type(model).__name__}")
-            
+            logger.info(
+                f"EGX v1.0: Starting training session for {type(model).__name__}"
+            )
+
             # 1. Boot the Engine (Phases 1-4)
             if not self._is_booted:
                 self._engine.boot(model)
@@ -62,7 +64,7 @@ class EGXTrainer:
                 dataset=dataset,
                 eval_dataset=eval_dataset,
                 config=self.config,
-                **kwargs
+                **kwargs,
             )
 
             # 3. Shutdown (Phase 10)
@@ -77,8 +79,9 @@ class EGXTrainer:
             raise EGXError(
                 message="Fatal system error during training execution.",
                 code="SYSTEM_CRITICAL",
-                recoverable=False
+                recoverable=False,
             ) from e
+
 
 # Alias for definitive user access
 EGX = EGXTrainer

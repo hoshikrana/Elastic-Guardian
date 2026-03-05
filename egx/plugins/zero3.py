@@ -28,8 +28,9 @@ class ZeRO3Plugin:
             # On single GPU, ZeRO-3 behaves like ZeRO-Offload (Offload states)
             logger.info("ZeRO-3: Single GPU detected, defaulting to ZeRO-Offload mode.")
             return model
-            
+
         # Real impl would use Deepspeed or FSDP
         # EGX provides a lightweight wrapper for FSDP
         from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+
         return FSDP(model)

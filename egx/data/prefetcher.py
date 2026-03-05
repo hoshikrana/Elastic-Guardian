@@ -16,7 +16,7 @@ class GPUDataPrefetcher:
     Zero-stall CUDA Prefetcher.
     Uses a dedicated CUDA stream for asynchronous transfers.
     """
-    
+
     def __init__(self, loader: Iterator, device: torch.device):
         self.loader = loader
         self.device = device
@@ -39,11 +39,15 @@ class GPUDataPrefetcher:
 
     def _move_to_device(self, batch: Any) -> Any:
         if isinstance(batch, dict):
-            return {k: v.to(self.device, non_blocking=True) if hasattr(v, "to") else v 
-                    for k, v in batch.items()}
+            return {
+                k: v.to(self.device, non_blocking=True) if hasattr(v, "to") else v
+                for k, v in batch.items()
+            }
         elif isinstance(batch, (list, tuple)):
-            return [v.to(self.device, non_blocking=True) if hasattr(v, "to") else v 
-                    for v in batch]
+            return [
+                v.to(self.device, non_blocking=True) if hasattr(v, "to") else v
+                for v in batch
+            ]
         elif hasattr(batch, "to"):
             return batch.to(self.device, non_blocking=True)
         return batch
@@ -51,11 +55,11 @@ class GPUDataPrefetcher:
     def __next__(self) -> Any:
         if self.stream:
             torch.cuda.current_stream().wait_stream(self.stream)
-            
+
         batch = self.next_batch
         if batch is None:
             raise StopIteration
-            
+
         self._preload()
         return batch
 

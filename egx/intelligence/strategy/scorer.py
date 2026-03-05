@@ -49,12 +49,14 @@ class StrategyScorer:
 
             score = (utilization * 0.4 + quality_bonus * 0.6) if fits else 0.0
 
-            results.append(ScoredStrategy(
-                mode=mode,
-                score=round(score, 4),
-                fits=fits,
-                rationale=f"Budget={budget}, Model={model_bytes}, Util={utilization:.2f}"
-            ))
+            results.append(
+                ScoredStrategy(
+                    mode=mode,
+                    score=round(score, 4),
+                    fits=fits,
+                    rationale=f"Budget={budget}, Model={model_bytes}, Util={utilization:.2f}",
+                )
+            )
 
         results.sort(key=lambda s: s.score, reverse=True)
         return results

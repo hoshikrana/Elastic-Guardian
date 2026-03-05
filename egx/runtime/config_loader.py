@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 
 class TrieNode:
     __slots__ = ("children", "value", "is_end")
-    
+
     def __init__(self):
         self.children: Dict[str, TrieNode] = {}
         self.value: Any = None
@@ -23,7 +23,7 @@ class ConfigTrie:
     """
     Law 11: Trie-backed config namespace resolver.
     """
-    
+
     def __init__(self):
         self.root = TrieNode()
 
@@ -56,7 +56,7 @@ class ConfigTrie:
             if seg not in node.children:
                 return []
             node = node.children[seg]
-            
+
         results = []
         self._dfs(node, prefix, results)
         return results
@@ -64,7 +64,7 @@ class ConfigTrie:
     def _dfs(self, node: TrieNode, current_key: str, results: List[str]):
         if node.is_end:
             results.append(current_key)
-            
+
         for seg, child in node.children.items():
             new_key = f"{current_key}.{seg}" if current_key else seg
             self._dfs(child, new_key, results)

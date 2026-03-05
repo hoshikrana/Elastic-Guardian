@@ -13,7 +13,7 @@ from typing import Any, List, Optional
 
 class FibNode:
     __slots__ = ("key", "value", "parent", "child", "left", "right", "degree", "mark")
-    
+
     def __init__(self, key: float, value: Any):
         self.key = key
         self.value = value
@@ -33,7 +33,7 @@ class FibonacciHeap:
     Increase-Key: O(1) amortized
     Merge: O(1)
     """
-    
+
     def __init__(self):
         self.max_node: Optional[FibNode] = None
         self.total_nodes: int = 0
@@ -58,11 +58,11 @@ class FibonacciHeap:
                 for child in children:
                     self._link_to_root_list(child)
                     child.parent = None
-            
+
             # Remove z from root list
             z.left.right = z.right
             z.right.left = z.left
-            
+
             if z == z.right:
                 self.max_node = None
             else:
@@ -73,14 +73,14 @@ class FibonacciHeap:
 
     def increase_key(self, node: FibNode, new_key: float):
         if new_key < node.key:
-            return # Should not happen in strategy selection
-            
+            return  # Should not happen in strategy selection
+
         node.key = new_key
         parent = node.parent
         if parent is not None and node.key > parent.key:
             self._cut(node, parent)
             self._cascading_cut(parent)
-            
+
         if node.key > self.max_node.key:
             self.max_node = node
 
@@ -117,7 +117,7 @@ class FibonacciHeap:
         # D(n) = log_phi(n)
         d = int(math.log(self.total_nodes, 1.618)) + 2
         a = [None] * d
-        
+
         nodes = self._get_list(self.max_node)
         for w in nodes:
             x = w
@@ -130,7 +130,7 @@ class FibonacciHeap:
                 a[degree] = None
                 degree += 1
             a[degree] = x
-            
+
         self.max_node = None
         for i in range(d):
             if a[i] is not None:
@@ -147,7 +147,7 @@ class FibonacciHeap:
         # Remove y from root list
         y.left.right = y.right
         y.right.left = y.left
-        
+
         # Make y child of x
         y.parent = x
         if x.child is None:

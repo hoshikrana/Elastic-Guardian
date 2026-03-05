@@ -17,7 +17,7 @@ class GradientAccumulator:
     Manages micro-batching for constrained systems.
     Calculates step boundaries and scaling factors.
     """
-    
+
     def __init__(self, target_steps: int):
         self.target_steps = target_steps
         self.current_step = 0

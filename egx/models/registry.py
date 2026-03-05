@@ -33,9 +33,7 @@ _REGISTRY: Dict[str, ModelArchConfig] = {
     "mistral-7b": ModelArchConfig(
         "mistral-7b", 4096, 32, 32, 14336, 32000, 8192, 7_241_000_000
     ),
-    "phi-2": ModelArchConfig(
-        "phi-2", 2560, 32, 32, 10240, 51200, 2048, 2_780_000_000
-    ),
+    "phi-2": ModelArchConfig("phi-2", 2560, 32, 32, 10240, 51200, 2048, 2_780_000_000),
     "gpt2-small": ModelArchConfig(
         "gpt2-small", 768, 12, 12, 3072, 50257, 1024, 124_000_000
     ),

@@ -11,6 +11,7 @@ from typing import Any
 
 logger = logging.getLogger("egx.peft")
 
+
 class LoRAMerger:
     """
     Weights Merge Engine.
@@ -25,6 +26,6 @@ class LoRAMerger:
         # Walking model to find adapters
         # For each adapter:
         # base_weight.data += (lora_b.data @ lora_a.data) * scaling
-        
+
         logger.info("PEFT: Merge complete. Adapters fully integrated into base.")
         return model

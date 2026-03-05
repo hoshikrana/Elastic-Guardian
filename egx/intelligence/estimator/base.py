@@ -14,13 +14,18 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from egx.core.models import HardwareTopology, ModelProfile, MemoryReport, TrainingPlan
+    from egx.core.models import (
+        HardwareTopology,
+        ModelProfile,
+        MemoryReport,
+        TrainingPlan,
+    )
 
 
 class BaseEstimator(ABC):
     """
     Abstract base for memory estimators.
-    
+
     Subclasses implement different fidelity levels:
     - Analytical: Formula-based, <1ms.
     - DryRun: Measured on-device, 5-30s.
@@ -29,10 +34,7 @@ class BaseEstimator(ABC):
 
     @abstractmethod
     def estimate(
-        self, 
-        topology: HardwareTopology, 
-        profile: ModelProfile, 
-        plan: TrainingPlan
+        self, topology: HardwareTopology, profile: ModelProfile, plan: TrainingPlan
     ) -> MemoryReport:
         """
         Produce a MemoryReport for the given configuration.

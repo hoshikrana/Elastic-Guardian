@@ -15,7 +15,9 @@ logger = logging.getLogger("egx.orchestration.pressure")
 class ElasticBatchResizer:
     """Halves or doubles batch size based on VRAM usage."""
 
-    def __init__(self, initial_batch: int = 8, min_batch: int = 1, max_batch: int = 256):
+    def __init__(
+        self, initial_batch: int = 8, min_batch: int = 1, max_batch: int = 256
+    ):
         self.current_batch = initial_batch
         self.min_batch = min_batch
         self.max_batch = max_batch
@@ -34,7 +36,9 @@ class ElasticBatchResizer:
         """Attempts to increase batch size if pressure is low."""
         if vram_usage_pct < 0.6 and self.current_batch < self.max_batch:
             self.current_batch = min(self.max_batch, self.current_batch * 2)
-            logger.info(f"Low pressure ({vram_usage_pct:.0%}): Batch increased to {self.current_batch}")
+            logger.info(
+                f"Low pressure ({vram_usage_pct:.0%}): Batch increased to {self.current_batch}"
+            )
         return self.current_batch
 
     @property

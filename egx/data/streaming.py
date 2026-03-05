@@ -20,15 +20,18 @@ class ElasticDataset(IterableDataset):
     Streaming implementation for Layer 7 zero-config training.
     Supports JSONL and Safetensors shard streaming.
     """
-    
+
     def __init__(
-        self, 
-        data_path: Union[str, Path, List[str]], 
+        self,
+        data_path: Union[str, Path, List[str]],
         tokenizer: Any,
         max_seq_len: int = 2048,
-        infinite_loop: bool = False
+        infinite_loop: bool = False,
     ):
-        self.paths = [Path(p) for p in ([data_path] if isinstance(data_path, (str, Path)) else data_path)]
+        self.paths = [
+            Path(p)
+            for p in ([data_path] if isinstance(data_path, (str, Path)) else data_path)
+        ]
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
         self.infinite_loop = infinite_loop
@@ -45,7 +48,7 @@ class ElasticDataset(IterableDataset):
                     yield from self._stream_text(path)
                 else:
                     raise ValueError(f"Unsupported data format: {path.suffix}")
-            
+
             if not self.infinite_loop:
                 break
 
@@ -54,29 +57,31 @@ class ElasticDataset(IterableDataset):
             for line in f:
                 data = json.loads(line)
                 text = data.get("text") or data.get("content") or ""
-                if not text: continue
-                
+                if not text:
+                    continue
+
                 features = self.tokenizer(
                     text,
                     truncation=True,
                     max_length=self.max_seq_len,
-                    return_tensors="pt"
+                    return_tensors="pt",
                 )
-                
+
                 yield {k: v.squeeze(0) for k, v in features.items()}
 
     def _stream_text(self, path: Path) -> Iterator[Dict[str, torch.Tensor]]:
         with open(path, "r", encoding="utf-8") as f:
             # Simple chunked text streaming
-            chunk_size = 1024 * 1024 # 1MB
+            chunk_size = 1024 * 1024  # 1MB
             while True:
                 content = f.read(chunk_size)
-                if not content: break
-                
+                if not content:
+                    break
+
                 features = self.tokenizer(
                     content,
                     truncation=True,
                     max_length=self.max_seq_len,
-                    return_tensors="pt"
+                    return_tensors="pt",
                 )
                 yield {k: v.squeeze(0) for k, v in features.items()}

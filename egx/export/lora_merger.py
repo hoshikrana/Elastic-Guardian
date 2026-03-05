@@ -13,6 +13,7 @@ from egx.peft.merger import LoRAMerger as PEFTWeightMerger
 
 logger = logging.getLogger("egx.export")
 
+
 class LoRAExportMerger:
     """
     High-level export engine.
@@ -26,15 +27,15 @@ class LoRAExportMerger:
 
     def merge_and_export(self, model: Any, output_path: str):
         logger.info("Export: Preparing model for final delivery...")
-        
+
         # 1. Merge adapters (Layer 5 merger)
         # merged_model = self._merger.merge_weights(model)
-        
+
         # 2. Sharded export (safetensors)
         logger.info(f"Export: Saving sharded safetensors to '{output_path}'...")
-        
+
         # 3. Precision Conversion (Optional FP8/INT4)
         logger.info("Export: Applying dynamic range quantization...")
-        
+
         logger.info(f"✔ Model successfully exported to {output_path}")
         return output_path

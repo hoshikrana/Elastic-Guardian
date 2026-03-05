@@ -41,7 +41,9 @@ def get_lora_plus_param_groups(
     if group_a:
         groups.append({"params": group_a, "lr": base_lr, "name": "lora_A"})
     if group_b:
-        groups.append({"params": group_b, "lr": base_lr * lora_b_multiplier, "name": "lora_B"})
+        groups.append(
+            {"params": group_b, "lr": base_lr * lora_b_multiplier, "name": "lora_B"}
+        )
     if group_other:
         groups.append({"params": group_other, "lr": base_lr, "name": "other"})
 

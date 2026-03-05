@@ -16,11 +16,12 @@ class EGXConfig:
     Master configuration for an EGX training session.
     All fields have sensible defaults — zero-config is the default.
     """
+
     # Model
     model_name_or_path: Optional[str] = None
     scratch: bool = False
     scratch_config_path: Optional[str] = None
-    
+
     # Training
     max_steps: int = -1
     num_epochs: int = 3
@@ -29,25 +30,25 @@ class EGXConfig:
     warmup_ratio: float = 0.03
     gradient_accumulation_steps: int = 1
     max_grad_norm: float = 1.0
-    
+
     # PEFT
     lora_rank: int = 16
     lora_alpha: int = 32
     lora_dropout: float = 0.05
     lora_targets: Optional[tuple] = None
-    
+
     # Data
     dataset_path: Optional[str] = None
     max_seq_length: int = 2048
-    
+
     # Checkpointing
     output_dir: str = "./egx_output"
     checkpoint_strategy: str = "adaptive"
     save_total_limit: int = 3
-    
+
     # Hardware
     device: str = "auto"
-    
+
     # Advanced
     overrides: Dict[str, Any] = field(default_factory=dict)
 

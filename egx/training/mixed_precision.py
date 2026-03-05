@@ -17,12 +17,12 @@ class PrecisionSelector:
     Universal Precision Manager.
     Ensures 'zero-config' precision that just works on any hardware.
     """
-    
+
     @staticmethod
     def select_optimal(topology: HardwareTopology) -> Tuple[DType, bool]:
         """
         Returns (WeightDType, UseAutocast).
-        
+
         Logic:
         - Ampere+ NVIDIA: BF16 (Best stability/speed)
         - Old NVIDIA: FP16
@@ -31,16 +31,16 @@ class PrecisionSelector:
         """
         if not topology.gpus:
             return DType.FP32, False
-            
+
         gpu = topology.gpus[0]
-        
+
         # Ampere+ (compute capability >= 8.0) supports BF16
         if gpu.compute_capability[0] >= 8:
             return DType.BF16, True
-            
+
         # Older CUDA GPUs
         if gpu.compute_capability[0] >= 7:
             return DType.FP16, True
-            
+
         # Default fallback
         return DType.FP32, False

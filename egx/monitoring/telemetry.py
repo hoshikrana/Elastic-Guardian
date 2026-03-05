@@ -19,7 +19,7 @@ class TelemetryService:
     """
     Handles training observation.
     """
-    
+
     def __init__(self, log_dir: str = "./logs/egx"):
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -28,18 +28,16 @@ class TelemetryService:
 
     def broadcast_step(self, step: int, metrics: Dict[str, Any]):
         """Logs a step to the jsonl file and console."""
-        payload = {
-            "step": step,
-            "timestamp": time.time(),
-            **metrics
-        }
-        
+        payload = {"step": step, "timestamp": time.time(), **metrics}
+
         # 1. Write to local storage
         with open(self.history_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(payload) + "\n")
-            
+
         # 2. Console Summary
         if step % 10 == 0:
             loss = metrics.get("loss", 0.0)
             tps = metrics.get("tokens_per_sec", 0.0)
-            logger.info(f"EGX Step {step}: Loss={loss:.4f} | Throughput={tps:.1f} tokens/s")
+            logger.info(
+                f"EGX Step {step}: Loss={loss:.4f} | Throughput={tps:.1f} tokens/s"
+            )

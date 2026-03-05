@@ -8,15 +8,15 @@ Used in: intelligence/estimator/dryrun.py
 from __future__ import annotations
 
 
-
 class MemorySegmentTree:
     """
     Law 11: Range-max detector for estimation snapshots.
     """
-    
+
     def __init__(self, size: int):
         self.n = 1
-        while self.n < size: self.n <<= 1
+        while self.n < size:
+            self.n <<= 1
         self.tree = [0] * (2 * self.n)
 
     def update(self, pos: int, val_bytes: int):
@@ -25,7 +25,7 @@ class MemorySegmentTree:
         self.tree[i] = val_bytes
         while i > 1:
             i >>= 1
-            self.tree[i] = max(self.tree[2*i], self.tree[2*i+1])
+            self.tree[i] = max(self.tree[2 * i], self.tree[2 * i + 1])
 
     def query_max(self, l: int, r: int) -> int:
         """O(log n) range-max query [l, r)."""

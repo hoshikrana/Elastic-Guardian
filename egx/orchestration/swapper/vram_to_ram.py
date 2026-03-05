@@ -34,7 +34,9 @@ class VRAMToRAMSwapper:
             logger.info(f"Offloaded {layer_prefix}: {freed} bytes freed from VRAM")
         return freed
 
-    def restore(self, model: nn.Module, layer_prefix: str, device: str = "cuda") -> None:
+    def restore(
+        self, model: nn.Module, layer_prefix: str, device: str = "cuda"
+    ) -> None:
         """Restore offloaded parameters back to VRAM."""
         for name, param in model.named_parameters():
             if name in self._offloaded and name.startswith(layer_prefix):

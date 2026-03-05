@@ -17,23 +17,23 @@ class MemoryValue:
     Law 10: Integer-only memory representation.
     Wraps an int to provide strict validation and overflow guards.
     """
-    
+
     __slots__ = ("_bytes",)
-    
+
     def __init__(self, val: Union[int, MemoryValue]):
         if isinstance(val, MemoryValue):
             val = val._bytes
-            
+
         # Law 10: Explicit check for bool as int trap
         if isinstance(val, bool):
             # This would be caught by validators too, but we harden here.
-            val = int(val) 
+            val = int(val)
 
         if val < 0:
             raise NegativeMemoryError("MemoryValue", val)
         if val > sys.maxsize:
             raise MemoryOverflowError(val, sys.maxsize)
-            
+
         self._bytes: int = int(val)
 
     @property
