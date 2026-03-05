@@ -2,7 +2,6 @@
 Status: ACCEPTED
 
 ## Problem
-Old elastic_guardian had models/ package. EGX v1 omitted it.
 ModelProfile (core/models.py) is a dataclass but nothing loads or introspects a real nn.Module.
 Phase 4 of lifecycle.py ("Model Introspection") had no concrete implementation.
 

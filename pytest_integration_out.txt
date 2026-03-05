@@ -1,0 +1,11 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-9.0.2, pluggy-1.6.0
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: E:\Project\EGX
+configfile: pyproject.toml
+plugins: hypothesis-6.151.9, benchmark-5.2.3, cov-7.0.0, timeout-2.4.0
+collected 1 item
+
+tests\integration\test_elastic_batch.py .                                [100%]
+
+============================== 1 passed in 0.19s ==============================

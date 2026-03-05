@@ -1,1 +1,7 @@
-# api — Layer 7. Public surface. Frozen from v0.1.
+"""
+EGX API Exports — Layer 7.
+"""
+
+from egx.api.trainer import EGXTrainer as EGX
+
+__all__ = ["EGX"]

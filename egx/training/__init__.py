@@ -1,1 +1,3 @@
-# training — Layer 5c. Self-healing training loop.
+"""
+EGX Training — Layer 5.
+"""

@@ -1,0 +1,248 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-9.0.2, pluggy-1.6.0
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: E:\Project\EGX
+configfile: pyproject.toml
+plugins: hypothesis-6.151.9, benchmark-5.2.3, cov-7.0.0, timeout-2.4.0
+collected 84 items
+
+tests\unit\api\test_config.py ..                                         [  2%]
+tests\unit\api\test_trainer.py .                                         [  3%]
+tests\unit\core\memory\test_formatting.py ..                             [  5%]
+tests\unit\core\memory\test_units.py ..                                  [  8%]
+tests\unit\core\memory\test_validators.py ..                             [ 10%]
+tests\unit\core\memory\test_value.py ....                                [ 15%]
+tests\unit\core\test_constants.py ..                                     [ 17%]
+tests\unit\core\test_enums.py .....                                      [ 23%]
+tests\unit\core\test_exceptions.py ....                                  [ 28%]
+tests\unit\core\test_models.py ...                                       [ 32%]
+tests\unit\dsa\test_binary_search.py .                                   [ 33%]
+tests\unit\dsa\test_dijkstra.py .                                        [ 34%]
+tests\unit\dsa\test_fibonacci_heap.py ..                                 [ 36%]
+tests\unit\dsa\test_kahns_bfs.py ..                                      [ 39%]
+tests\unit\dsa\test_red_black_tree.py ..                                 [ 41%]
+tests\unit\dsa\test_segment_tree.py .                                    [ 42%]
+tests\unit\dsa\test_skip_list.py .                                       [ 44%]
+tests\unit\dsa\test_trie.py ..                                           [ 46%]
+tests\unit\infrastructure\test_gpu_probe.py ..                           [ 48%]
+tests\unit\infrastructure\test_structured_logger.py ..                   [ 51%]
+tests\unit\intelligence\estimator\calibration\test_cache.py ...          [ 54%]
+tests\unit\intelligence\estimator\calibration\test_regression.py ..      [ 57%]
+tests\unit\intelligence\planner\test_memory_planner.py .                 [ 58%]
+tests\unit\intelligence\planner\test_timeline_planner.py .               [ 59%]
+tests\unit\intelligence\planner\test_topology_planner.py .               [ 60%]
+tests\unit\intelligence\strategy\test_parallel_advisor.py .              [ 61%]
+tests\unit\intelligence\strategy\test_scorer.py .                        [ 63%]
+tests\unit\models\test_registry.py ...                                   [ 66%]
+tests\unit\orchestration\pressure\test_elastic_batch.py ..               [ 69%]
+tests\unit\orchestration\pressure\test_eviction_policy.py .              [ 70%]
+tests\unit\orchestration\swapper\test_ram_to_nvme.py .                   [ 71%]
+tests\unit\peft\test_lora.py ..                                          [ 73%]
+tests\unit\peft\test_lora_plus.py .                                      [ 75%]
+tests\unit\peft\test_qlora.py .                                          [ 76%]
+tests\unit\resilience\checkpoint\test_manager.py FF                      [ 78%]
+tests\unit\resilience\checkpoint\test_reader.py F                        [ 79%]
+tests\unit\resilience\checkpoint\test_writer.py F                        [ 80%]
+tests\unit\resilience\test_sanitizer.py ...                              [ 84%]
+tests\unit\resilience\test_watchdog.py .                                 [ 85%]
+tests\unit\runtime\test_engine.py .                                      [ 86%]
+tests\unit\test_dsa_core.py .....                                        [ 92%]
+tests\unit\test_layer1_hardening.py ....                                 [ 97%]
+tests\unit\training\test_kernel.py F                                     [ 98%]
+tests\unit\training\test_mixed_precision.py .                            [100%]
+
+================================== FAILURES ===================================
+_________________ TestCheckpointManager.test_should_save_loss _________________
+
+self = <tests.unit.resilience.checkpoint.test_manager.TestCheckpointManager testMethod=test_should_save_loss>
+
+    def test_should_save_loss(self):
+>       mgr = CheckpointManager(save_on_loss_drop=0.1)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: CheckpointManager.__init__() got an unexpected keyword argument 'save_on_loss_drop'
+
+tests\unit\resilience\checkpoint\test_manager.py:15: TypeError
+_________________ TestCheckpointManager.test_should_save_step _________________
+
+self = <tests.unit.resilience.checkpoint.test_manager.TestCheckpointManager testMethod=test_should_save_step>
+
+    def test_should_save_step(self):
+        # Default is 100 steps
+>       mgr = CheckpointManager(save_freq_steps=10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: CheckpointManager.__init__() got an unexpected keyword argument 'save_freq_steps'
+
+tests\unit\resilience\checkpoint\test_manager.py:10: TypeError
+___________________ TestCheckpointReader.test_read_verified ___________________
+
+self = <tests.unit.resilience.checkpoint.test_reader.TestCheckpointReader testMethod=test_read_verified>
+
+    def test_read_verified(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+>           writer = CheckpointWriter(tmpdir)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: CheckpointWriter() takes no arguments
+
+tests\unit\resilience\checkpoint\test_reader.py:14: TypeError
+____________________ TestCheckpointWriter.test_atomic_save ____________________
+
+self = <tests.unit.resilience.checkpoint.test_writer.TestCheckpointWriter testMethod=test_atomic_save>
+
+    def test_atomic_save(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+>           writer = CheckpointWriter(tmpdir)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: CheckpointWriter() takes no arguments
+
+tests\unit\resilience\checkpoint\test_writer.py:13: TypeError
+_____________________ TestTrainingKernel.test_train_step ______________________
+
+self = <egx.training.kernel.TrainingKernel object at 0x000001E835AA0050>
+batch = {'input': tensor([[ 0.6830,  2.4446,  0.5502, -1.5977, -0.6897, -0.9385, -0.1667, -0.2064,
+         -0.2527, -2.4074],...2784, -0.0288, -0.4764,  1.8016, -1.4142,
+          0.1216,  0.1778]]), 'target': tensor([[0.8701],
+        [2.0973]])}
+step = 1
+
+    def train_step(self, batch: Dict[str, Any], step: int) -> float:
+        """
+        Executes a single training step with recovery guards and mixed precision.
+        """
+        if self.watchdog:
+            self.watchdog.heartbeat(step)
+    
+        if self.optimizer is None:
+            logger.warning("No optimizer available. Skipping step.")
+            return 0.0
+    
+        try:
+            self.optimizer.zero_grad()
+    
+            # Use autocast if available
+            device_type = "cuda" if torch.cuda.is_available() else "cpu"
+            with torch.amp.autocast(device_type=device_type):
+>               outputs = self.model(**batch)
+                          ^^^^^^^^^^^^^^^^^^^
+
+egx\training\kernel.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\torch\nn\modules\module.py:1776: in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Linear(in_features=10, out_features=1, bias=True), args = ()
+kwargs = {'input': tensor([[ 0.6830,  2.4446,  0.5502, -1.5977, -0.6897, -0.9385, -0.1667, -0.2064,
+         -0.2527, -2.4074],...2784, -0.0288, -0.4764,  1.8016, -1.4142,
+          0.1216,  0.1778]]), 'target': tensor([[0.8701],
+        [2.0973]])}
+
+    def _call_impl(self, *args, **kwargs):
+        forward_call = (self._slow_forward if torch._C._get_tracing_state() else self.forward)
+        # If we don't have any hooks, we want to skip the rest of the logic in
+        # this function, and just call forward.
+        if not (self._backward_hooks or self._backward_pre_hooks or self._forward_hooks or self._forward_pre_hooks
+                or _global_backward_pre_hooks or _global_backward_hooks
+                or _global_forward_hooks or _global_forward_pre_hooks):
+>           return forward_call(*args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: Linear.forward() got an unexpected keyword argument 'target'
+
+.venv\Lib\site-packages\torch\nn\modules\module.py:1787: TypeError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.unit.training.test_kernel.TestTrainingKernel testMethod=test_train_step>
+
+    def test_train_step(self):
+        model = nn.Linear(10, 1)
+        kernel = TrainingKernel(model, learning_rate=0.01)
+        batch = {"input": torch.randn(2, 10), "target": torch.randn(2, 1)}
+    
+        # Mock model call
+        def mock_call(input, target):
+            class Out: pass
+            o = Out(); o.loss = (model(input) - target).pow(2).mean()
+            return o
+        model.__call__ = mock_call
+    
+>       loss = kernel.train_step(batch, step=1)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\training\test_kernel.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <egx.training.kernel.TrainingKernel object at 0x000001E835AA0050>
+batch = {'input': tensor([[ 0.6830,  2.4446,  0.5502, -1.5977, -0.6897, -0.9385, -0.1667, -0.2064,
+         -0.2527, -2.4074],...2784, -0.0288, -0.4764,  1.8016, -1.4142,
+          0.1216,  0.1778]]), 'target': tensor([[0.8701],
+        [2.0973]])}
+step = 1
+
+    def train_step(self, batch: Dict[str, Any], step: int) -> float:
+        """
+        Executes a single training step with recovery guards and mixed precision.
+        """
+        if self.watchdog:
+            self.watchdog.heartbeat(step)
+    
+        if self.optimizer is None:
+            logger.warning("No optimizer available. Skipping step.")
+            return 0.0
+    
+        try:
+            self.optimizer.zero_grad()
+    
+            # Use autocast if available
+            device_type = "cuda" if torch.cuda.is_available() else "cpu"
+            with torch.amp.autocast(device_type=device_type):
+                outputs = self.model(**batch)
+                loss = outputs.loss if hasattr(outputs, "loss") else outputs.sum()
+    
+            if self.scaler:
+                self.scaler.scale(loss).backward()
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
+            else:
+                loss.backward()
+                self.optimizer.step()
+    
+            # Checkpointing
+            if self.checkpoint_mgr and self.checkpoint_mgr.should_save(step, loss.item()):
+                self.checkpoint_mgr.checkpoint(step, loss.item(), self.model.state_dict())
+    
+            return float(loss.item())
+    
+        except (torch.cuda.OutOfMemoryError, RuntimeError) as e:
+            if "out of memory" in str(e).lower():
+                logger.error("VRAM Exhausted: Kernel triggering OOM protocol.")
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                raise OutOfMemoryError() from e
+            raise EGXError(str(e), recoverable=True, suggested_action=RecoveryAction.RETRY) from e
+    
+        except Exception as e:
+            logger.error(f"Unexpected error in Kernel: {e}")
+>           raise EGXError(
+                message=f"Kernel crash at step {step}: {e}",
+                recoverable=True,
+                suggested_action=RecoveryAction.RETRY
+            ) from e
+E           egx.core.exceptions.EGXError: Kernel crash at step 1: Linear.forward() got an unexpected keyword argument 'target'
+
+egx\training\kernel.py:99: EGXError
+------------------------------ Captured log call ------------------------------
+ERROR    egx.training.kernel:kernel.py:98 Unexpected error in Kernel: Linear.forward() got an unexpected keyword argument 'target'
+============================== warnings summary ===============================
+egx\infrastructure\gpu_probe.py:14
+  E:\Project\EGX\egx\infrastructure\gpu_probe.py:14: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+    import pynvml
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/unit/resilience/checkpoint/test_manager.py::TestCheckpointManager::test_should_save_loss
+FAILED tests/unit/resilience/checkpoint/test_manager.py::TestCheckpointManager::test_should_save_step
+FAILED tests/unit/resilience/checkpoint/test_reader.py::TestCheckpointReader::test_read_verified
+FAILED tests/unit/resilience/checkpoint/test_writer.py::TestCheckpointWriter::test_atomic_save
+FAILED tests/unit/training/test_kernel.py::TestTrainingKernel::test_train_step
+=================== 5 failed, 79 passed, 1 warning in 4.02s ===================

@@ -2,7 +2,6 @@
 Status: ACCEPTED
 
 ## Problem
-Old elastic_guardian had export/ package. EGX v1 omitted it.
 Without export, training has no deployment path.
 LoRA merge is critical: deployed model MUST have adapters merged into base weights.
 
