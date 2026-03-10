@@ -10,11 +10,41 @@ EGX (Elastic Guardian X) is an advanced, zero-configuration training runtime des
 
 ---
 
-## 🚀 Vision
+## 🚀 Quickstart & Showcases
 
-In modern ML engineering, the transition from a local notebook to a large-scale GPU cluster is often fraught with boilerplate code, complex configuration, and fragile pipelines. **EGX eliminates this friction.**
+The best way to understand EGX is to watch it work dynamically. We have provided several beautiful, interactive scripts in the `examples/` directory to demonstrate its capabilities.
 
-It treats hardware as a dynamic resource, not a static constraint. Whether you are fine-tuning a 7B parameter model on a single consumer GPU or running massive distributed training, EGX intelligently manages the underlying complexity, allowing you to focus on the science of machine learning.
+### 1. The Interactive Showcase
+This script provides an animated, rich terminal UI that demonstrates real-time hardware probing, strategy decision-making, and an active proxy training loop.
+```bash
+python examples/showcase_egx.py
+```
+
+### 2. The EGX Stress Tester
+Wondering how large a model your current hardware can handle before running Out of Memory (OOM)? This script scales a model from 0.3M up to 20 Billion parameters, testing EGX's strict Layer 4 Memory Bounds safely without crashing the host OS.
+```bash
+python examples/stress_test_egx.py
+```
+
+### 3. Basic Example Setup
+A simple standard training loop using EGX.
+```bash
+python examples/train_example.py
+```
+
+---
+
+## 🏗️ Technical Architecture
+
+EGX's architecture is built on a foundation of **7 distinct layers** and **8 specialized Data Structure & Algorithm (DSA) patterns**, following a strict modular design:
+
+- **Intelligence Layer**: Predictive resource analysis and decision rationing.
+- **Orchestration Layer**: Dynamic workflow management and task scheduling.
+- **Resilience Layer**: Self-healing mechanisms and automated recovery protocols.
+- **Infrastructure Layer**: Cross-platform hardware abstraction (NVIDIA/AMD/Cloud).
+- **Core Engine**: The high-performance runtime that executes the training loops.
+
+---
 
 ## 🧠 Core Capabilities
 
@@ -32,23 +62,10 @@ Seamlessly scale from your local workstation to multi-node clusters. EGX's infra
 
 ---
 
-## 🏗️ Technical Architecture
-
-EGX's architecture is built on a foundation of **7 distinct layers** and **8 specialized Data Structure & Algorithm (DSA) patterns**, following a strict modular design:
-
-- **Intelligence Layer**: Predictive resource analysis and decision rationing.
-- **Orchestration Layer**: Dynamic workflow management and task scheduling.
-- **Resilience Layer**: Self-healing mechanisms and automated recovery protocols.
-- **Infrastructure Layer**: Cross-platform hardware abstraction (NVIDIA/AMD/Cloud).
-- **Core Engine**: The high-performance runtime that executes the training loops.
-
----
-
 ## 💻 Usage
 
 ### API Integration
 EGX provides a clean, Pythonic API that fits into any existing workflow.
-**Intelligent Adaptive Training Runtime. Zero configuration. All scales. Fault-tolerant.**
 
 ```python
 from egx.api.trainer import EGX
@@ -64,15 +81,11 @@ result = trainer.train(
     max_epochs=3
 )
 
-print(f"Decision Rationale: {result.decision_rationale}")
-result = EGX().train(model=my_model, dataset=train_dataset)
-print(result["mode"])  # "LoRA fits 18.2GB (75% of 24GB). Full FT needs 56GB."
+print(f"Decision Rationale: {result.get('mode')}")
 ```
 
 ### CLI Interface
 For engineers who prefer the terminal, EGX offers a powerful command-line interface:
-
-## Installation
 ```bash
 # Probe current hardware capabilities
 egx probe
@@ -82,9 +95,6 @@ egx train --config production.yaml
 
 # Benchmark your system
 egx benchmark
-pip install -e .              # core
-pip install -e ".[flash]"     # + FlashAttention2
-pip install -e ".[all]"       # + ONNX export + REST API
 ```
 
 ---
@@ -94,18 +104,45 @@ pip install -e ".[all]"       # + ONNX export + REST API
 ### Quick Start
 ```bash
 pip install egx
-## Windows
-```bat
+
+# Or run the Windows installer
 install.bat
 ```
 
 ### Advanced Features
 ```bash
+# Core installation
+pip install -e .              
+
 # Install with Flash Attention 2 support
-pip install "egx[flash]"
+pip install -e ".[flash]"
 
 # Install full production suite (REST API + ONNX Export)
-pip install "egx[all]"
+pip install -e ".[all]"       
+```
+
+---
+
+## 🧪 Testing & Verification
+
+EGX is thoroughly tested using `pytest` across several independent vectors to guarantee its resilient architecture. To run the tests, a newcomer must use the following commands:
+
+**Run the Core Structural Diagnostic Suite:**
+This runs `test_all_modules.py`, an exhaustive execution of the framework's fundamental logic layers.
+```bash
+python tests/test_all_modules.py
+```
+
+**Run Unit & Data Structure Integrity Tests:**
+```bash
+pytest tests/unit/dsa/ -v
+pytest tests/unit/ -v
+```
+
+**Run the Full Framework Ecosystem Check:**
+Verify absolute stability across the entire project structure.
+```bash
+pytest tests/
 ```
 
 ---
@@ -116,10 +153,5 @@ pip install "egx[all]"
 - **Technical Specification**: See `docs/architecture/EGX_Definitive_Architecture.docx`
 - **Contributor Guide**: Under `docs/CONTRIBUTING.md` (Coming Soon)
 
----
-
 ## ⚖️ License
-
 EGX is licensed under the **Apache License 2.0**. See the [LICENSE](LICENSE) file for more details.
-Architecture: 7 layers · 8 DSA structures · 12 inviolable laws.
-See `docs/architecture/`

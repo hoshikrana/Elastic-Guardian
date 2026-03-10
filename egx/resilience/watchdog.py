@@ -11,11 +11,12 @@ import time
 import logging
 from typing import Optional
 from egx.core.exceptions import DeadlockError
+from egx.core.interfaces import BaseWatchdog
 
 logger = logging.getLogger("egx.resilience.watchdog")
 
 
-class TrainingWatchdog:
+class TrainingWatchdog(BaseWatchdog):
     """
     Law 2: No global mutable state.
     Law 3: Dependency injection.

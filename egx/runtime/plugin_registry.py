@@ -7,7 +7,7 @@ Automated discovery and loading of hardware-specific optimizations.
 from __future__ import annotations
 
 import logging
-from typing import Dict
+from typing import Dict, Any, Optional
 
 
 class PluginRegistry:

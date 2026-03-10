@@ -54,7 +54,7 @@ def train(
     )
 
     trainer = EGX()
-    result = trainer.train(
+    trainer.train(
         model=target, dataset=[], scratch=scratch, config_path=config
     )
 

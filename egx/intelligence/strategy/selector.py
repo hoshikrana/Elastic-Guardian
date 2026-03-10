@@ -23,9 +23,10 @@ class FibNode:
         self.right: FibNode = self
         self.degree: int = 0
         self.mark: bool = False
+from egx.core.interfaces import BaseStrategySelector
 
 
-class FibonacciHeap:
+class FibonacciHeap(BaseStrategySelector):
     """
     Law 11: Documented Big-O Complexity.
     Insert: O(1)

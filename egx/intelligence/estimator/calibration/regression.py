@@ -53,9 +53,6 @@ class CalibrationRegression:
     def r_squared(self) -> float:
         if self._n < 3:
             return 0.0
-        mean_y = self._sum_y / self._n
-        ss_tot = self._sum_xx  # approximate
-        ss_res = sum_sq_residuals = 0.0  # would need stored pairs for exact
         return 0.0  # placeholder — full version stores history
 
     def reset(self) -> None:

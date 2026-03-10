@@ -10,6 +10,7 @@ import os
 import time
 import tempfile
 import pathlib
+from typing import Optional, Tuple
 
 
 class NVMeProber:

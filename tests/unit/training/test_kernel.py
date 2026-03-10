@@ -13,7 +13,8 @@ class TestTrainingKernel(unittest.TestCase):
                 super().__init__()
                 self.layer = nn.Linear(10, 1)
             def forward(self, input, target):
-                class Out: pass
+                class Out:
+                    pass
                 o = Out()
                 o.loss = (self.layer(input) - target).pow(2).mean()
                 return o

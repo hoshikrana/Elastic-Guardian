@@ -7,7 +7,9 @@ Runtime configuration with sane defaults and override support.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union, Callable, List
+
+from egx.core.enums import OptimizerType
 
 
 @dataclass
@@ -25,6 +27,12 @@ class EGXConfig:
     # Training
     max_steps: int = -1
     num_epochs: int = 3
+    optimizer_type: Union[str, OptimizerType] = "adamw"
+    loss_fn: Optional[Union[str, Callable]] = None
+    scheduler_type: Optional[str] = None
+    warmup_steps: int = 0
+    precision_override: Optional[str] = None
+    callbacks: List[Callable] = field(default_factory=list)
     learning_rate: float = 2e-5
     weight_decay: float = 0.01
     warmup_ratio: float = 0.03

@@ -8,6 +8,7 @@ Decouples weight magnitude and direction updates for better convergence.
 from __future__ import annotations
 
 import logging
+import math
 
 try:
     import torch

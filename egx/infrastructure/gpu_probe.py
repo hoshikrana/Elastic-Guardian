@@ -11,13 +11,14 @@ from __future__ import annotations
 import logging
 import pynvml
 import torch
-from typing import List, Tuple
+from typing import List, Tuple, Any
 from egx.core.models import GPUSpec
+from egx.core.interfaces import BaseGPUProber
 
 logger = logging.getLogger("egx.infrastructure.gpu")
 
 
-class GPUProber:
+class GPUProber(BaseGPUProber):
     """
     Law 1: One file, one responsibility (GPU probing).
     Law 9: Log every degradation.
@@ -87,7 +88,6 @@ class GPUProber:
             if isinstance(name, bytes):
                 name = name.decode("utf-8")
 
-            pci_info = pynvml.nvmlDeviceGetPciInfo(handle)
             mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
 
             # Capability
@@ -166,6 +166,6 @@ class GPUProber:
                     == pynvml.NVML_P2P_STATUS_OK
                 ):
                     peers.append(j)
-            except:
+            except Exception:
                 pass
         return tuple(peers)

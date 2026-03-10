@@ -10,9 +10,10 @@ import psutil
 from typing import List
 from egx.core.models import HardwareTopology, GPUSpec
 from egx.core.enums import InterconnectType
+from egx.core.interfaces import BaseTopologyBuilder
 
 
-class TopologyBuilder:
+class TopologyBuilder(BaseTopologyBuilder):
     """
     Law 1: Assembles the topology contract.
     """

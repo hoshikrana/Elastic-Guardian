@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import psutil
 from egx.api.trainer import EGX
 
 class LargeModel(nn.Module):
@@ -20,12 +21,21 @@ class LargeModel(nn.Module):
             x = torch.relu(layer(x))
         return self.fc_out(x)
 
+def custom_logging_callback(step: int, loss: float):
+    # A custom developer hook injected into the EGX training loop
+    print(f"  [Callback Hook] Step {step} completed with Loss {loss:.4f}")
+
 def main():
     print("Initializing EGX Framework...")
     
     # 1. Instantiate a MASSIVE model (Warning: This will use ~28GB of CPU RAM just to instantiate!)
     print("Building a ~7B parameter model...")
     try:
+        # Prevent OS-level hard-crash by proactively checking memory before instantiation
+        required_memory = 30 * 1024**3 # roughly 30GB for the 7B proxy LargeModel
+        available_memory = psutil.virtual_memory().available
+        if available_memory < required_memory:
+            raise MemoryError(f"Insufficient memory. Need {required_memory / 1e9:.2f} GB, only {available_memory / 1e9:.2f} GB available.")
         model = LargeModel()
     except MemoryError:
         print("\n[Simulation Warning] Not enough system RAM to literally instantiate a 7B parameter model in memory. Falling back to a smaller proxy model to demonstrate the EGX pipeline.")
@@ -38,8 +48,18 @@ def main():
         {"input_ids": torch.randn(4, 10)} for _ in range(5)
     ]
     
-    # 3. Initialize EGX Trainer with minimal config
-    trainer = EGX({"num_epochs": 10000, "learning_rate": 0.01})
+    # 3. Initialize EGX Trainer with deep custom flexibility
+    # We pass 'sgd', 'mse', a 'linear' scheduler, 'bf16' precision, and our custom callback hook.
+    trainer = EGX({
+        "num_epochs": 200, 
+        "learning_rate": 0.01,
+        "optimizer_type": "sgd",
+        "loss_fn": "mse",
+        "scheduler_type": "linear",
+        "warmup_steps": 50,
+        "precision_override": "bf16",
+        "callbacks": [custom_logging_callback]
+    })
     
     # 4. Run Training
     print("Starting EGX Training session...")

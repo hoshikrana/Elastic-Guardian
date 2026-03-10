@@ -10,11 +10,12 @@ import time
 import logging
 from egx.core.enums import CheckpointStrategy
 from egx.resilience.checkpoint.writer import CheckpointWriter
+from egx.core.interfaces import BaseCheckpointManager
 
 logger = logging.getLogger("egx.resilience.checkpoint")
 
 
-class CheckpointManager:
+class CheckpointManager(BaseCheckpointManager):
     """
     Law 4: Orchestrates checkpoint lifecycle.
     """

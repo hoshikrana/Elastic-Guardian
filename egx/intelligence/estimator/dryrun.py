@@ -27,20 +27,20 @@ class MemorySegmentTree:
             i >>= 1
             self.tree[i] = max(self.tree[2 * i], self.tree[2 * i + 1])
 
-    def query_max(self, l: int, r: int) -> int:
-        """O(log n) range-max query [l, r)."""
+    def query_max(self, left: int, right: int) -> int:
+        """O(log n) range-max query [left, right)."""
         res = 0
-        l += self.n
-        r += self.n
-        while l < r:
-            if l & 1:
-                res = max(res, self.tree[l])
-                l += 1
-            if r & 1:
-                r -= 1
-                res = max(res, self.tree[r])
-            l >>= 1
-            r >>= 1
+        left += self.n
+        right += self.n
+        while left < right:
+            if left & 1:
+                res = max(res, self.tree[left])
+                left += 1
+            if right & 1:
+                right -= 1
+                res = max(res, self.tree[right])
+            left >>= 1
+            right >>= 1
         return res
 
     def global_peak(self) -> int:
