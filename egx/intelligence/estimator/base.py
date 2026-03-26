@@ -22,7 +22,10 @@ if TYPE_CHECKING:
     )
 
 
-class BaseEstimator(ABC):
+from egx.core.interfaces import BaseEstimator
+
+
+class BaseEstimator(BaseEstimator):
     """
     Abstract base for memory estimators.
 

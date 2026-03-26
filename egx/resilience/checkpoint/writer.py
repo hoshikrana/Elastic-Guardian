@@ -18,8 +18,10 @@ logger = logging.getLogger("egx.resilience.checkpoint")
 class CheckpointWriter:
     """
     Law 1: Atomic checkpointing.
-    write to .tmp -> fsync -> rename.
+    write to .tmp -> fsync -> os.replace.
     """
+
+    __slots__ = ()
 
     def save(self, data: Dict[str, Any], path: str):
         path_obj = pathlib.Path(path)
@@ -27,24 +29,35 @@ class CheckpointWriter:
 
         try:
             # 1. Save to temporary file
-            torch.save(data, tmp_path)
+            # If all values are tensors, use safetensors for security
+            can_use_safetensors = all(isinstance(v, torch.Tensor) for v in data.values()) if isinstance(data, dict) else False
+            
+            if can_use_safetensors:
+                from safetensors.torch import save_file
+                save_file(data, tmp_path)
+            else:
+                torch.save(data, tmp_path)
 
             # 2. Compute SHA256
             sha256 = self._compute_sha256(tmp_path)
 
-            # 3. Write SHA256 sidecar
-            with open(path_obj.with_suffix(".sha256"), "w") as f:
+            # 3. Write SHA256 sidecar (Atomic sidecar too)
+            sidecar_path = path_obj.with_suffix(".sha256")
+            sidecar_tmp = sidecar_path.with_suffix(".sha256.tmp")
+            with open(sidecar_tmp, "w") as f:
                 f.write(sha256)
+                f.flush()
+                import os
+                os.fsync(f.fileno())
+            
+            # 4. Atomic Replace
+            os.replace(sidecar_tmp, sidecar_path)
+            os.replace(tmp_path, path_obj)
 
-            # 4. Atomic Rename
-            if path_obj.exists():
-                path_obj.unlink()
-            tmp_path.rename(path_obj)
-
-            logger.info(f"Atomic checkpoint saved: {path} (SHA: {sha256[:8]})")
+            logger.info("Atomic checkpoint saved: %s (SHA: %s)", path, sha256[:8])
 
         except Exception as e:
-            logger.error(f"Checkpoint save failed: {e}")
+            logger.error("Checkpoint save failed: %s", e)
             if tmp_path.exists():
                 tmp_path.unlink()
             raise

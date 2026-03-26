@@ -94,6 +94,23 @@ class TrainingMode(str, Enum):
     ADAPTER = "adapter"
     PHANTOM = "phantom"
 
+    def uses_peft(self) -> bool:
+        """Returns True if this training mode uses parameter-efficient fine-tuning."""
+        return self in (
+            TrainingMode.LORA,
+            TrainingMode.LORA_PLUS,
+            TrainingMode.DORA,
+            TrainingMode.QLORA,
+            TrainingMode.PREFIX,
+            TrainingMode.ADAPTER,
+        )
+
+    def weight_dtype(self, base_dtype: "DType") -> "DType":
+        """Returns the storage DType for model weights under this training mode."""
+        if self == TrainingMode.QLORA:
+            return DType.INT4
+        return base_dtype
+
 
 class ParallelStrategy(str, Enum):
     NONE = "none"
@@ -109,6 +126,22 @@ class OptimizerType(str, Enum):
     ADAM_8BIT = "adam_8bit"
     ADAFACTOR = "adafactor"
     SGD = "sgd"
+
+    def bytes_per_param(self) -> int:
+        """Returns the optimizer state bytes per trainable parameter.
+        
+        AdamW keeps 2 states (m, v) in FP32 = 8 bytes per param.
+        Adam 8-bit keeps 2 states in INT8 = 2 bytes per param.
+        Adafactor keeps ~1 state = 4 bytes per param.
+        SGD with momentum keeps 1 state = 4 bytes per param.
+        """
+        mapping = {
+            OptimizerType.ADAMW: 8,
+            OptimizerType.ADAM_8BIT: 2,
+            OptimizerType.ADAFACTOR: 4,
+            OptimizerType.SGD: 4,
+        }
+        return mapping.get(self, 8)
 
 
 class RecoveryAction(str, Enum):
@@ -130,12 +163,13 @@ class CheckpointStrategy(str, Enum):
 
 class EstimationMethod(str, Enum):
     ANALYTICAL = "analytical"
-    DRYRUN = "dryrun"
+    DRY_RUN = "dryrun"
     HYBRID = "hybrid"
-    ML_CORRECTED = "ml_corrected"
+    ML_BASED = "ml_based"
 
 
 class ArchType(str, Enum):
+    TRANSFORMER = "transformer"
     LLAMA = "llama"
     MISTRAL = "mistral"
     FALCON = "falcon"

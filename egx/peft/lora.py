@@ -12,8 +12,42 @@ from typing import Optional
 import torch
 import torch.nn as nn
 
+from dataclasses import dataclass, field
+ 
 logger = logging.getLogger("egx.peft.lora")
-
+ 
+ 
+@dataclass(slots=True)
+class LoRAConfig:
+    """Configuration for LoRA adaptation."""
+    rank: int = 16
+    alpha: int = 32
+    dropout: float = 0.05
+    target_modules: Optional[list[str]] = None
+ 
+ 
+class LoRAModel(nn.Module):
+    """Wrapper for a model with LoRA adapters."""
+    
+    __slots__ = ("base_model", "config")
+ 
+    def __init__(self, model: nn.Module, config: LoRAConfig):
+        super().__init__()
+        self.base_model = inject_lora(
+            model, 
+            rank=config.rank, 
+            alpha=config.alpha, 
+            targets=config.target_modules
+        )
+        self.config = config
+ 
+    def forward(self, *args, **kwargs):
+        return self.base_model(*args, **kwargs)
+ 
+    def state_dict(self, *args, **kwargs):
+        # We only want to save the LoRA weights in a real production scenario, 
+        # but for this framework, we return the whole thing or filter as needed.
+        return self.base_model.state_dict(*args, **kwargs)
 
 class LoRALinear(nn.Module):
     """

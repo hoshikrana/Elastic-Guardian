@@ -2,6 +2,7 @@
 EGX Metrics Registry — Layer 4.
 
 Centralized store for training telemetry (Loss, VRAM, Throughput).
+Law 2: No global mutable state — each registry is an isolated instance.
 """
 
 from __future__ import annotations
@@ -13,15 +14,12 @@ from collections import deque
 class MetricRegistry:
     """
     Lock-free metric aggregation.
+
+    Each trainer owns its own instance — no shared singleton state.
     """
 
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(MetricRegistry, cls).__new__(cls)
-            cls._instance.metrics: Dict[str, deque] = {}
-        return cls._instance
+    def __init__(self):
+        self.metrics: Dict[str, deque] = {}
 
     def log(self, name: str, value: float, window: int = 100):
         """Records a metric with a rolling window."""
@@ -40,3 +38,10 @@ class MetricRegistry:
         if name not in self.metrics or not self.metrics[name]:
             return None
         return self.metrics[name][-1]
+
+    def reset(self):
+        """Clears all stored metrics."""
+        self.metrics.clear()
+
+    def __repr__(self) -> str:
+        return f"MetricRegistry(metrics={list(self.metrics.keys())})"

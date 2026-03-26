@@ -23,6 +23,25 @@ class TopologyBuilder(BaseTopologyBuilder):
         cpu_cores = psutil.cpu_count(logical=False) or 1
         ram_bytes = psutil.virtual_memory().total
 
+        # NVMe Probe
+        try:
+            from egx.infrastructure.nvme_probe import NVMeProber
+            with NVMeProber() as prober:
+                nvme_read, nvme_write, nvme_capacity = prober.probe()
+        except Exception as e:
+            nvme_read, nvme_write, nvme_capacity = 3.5, 2.5, 100 * 1024 * 1024 * 1024
+            
+        # PCIe Bandwidth Sample
+        pcie_gbps = 15.8
+        try:
+            if gpus:
+                import torch
+                if torch.cuda.is_available():
+                    from egx.infrastructure.bandwidth_sampler import BandwidthSampler
+                    pcie_gbps = BandwidthSampler().sample_pcie(gpus[0].device_id)
+        except Exception:
+            pass
+
         # Interconnect Heuristic (Default to PCIE, updated by sampler)
         interconnect = InterconnectType.PCIE
         if any(g.nvlink_peer_ids for g in gpus):
@@ -32,12 +51,12 @@ class TopologyBuilder(BaseTopologyBuilder):
             gpus=tuple(gpus),
             cpu_cores=cpu_cores,
             ram_bytes=ram_bytes,
-            nvme_bytes=100 * 1024 * 1024 * 1024,  # Default 100GB, updated by probe
-            nvme_seq_read_gbps=3.5,
-            nvme_seq_write_gbps=2.5,
-            pcie_bandwidth_gbps=15.8,  # PCIe 3.0 x16 approx
+            nvme_bytes=nvme_capacity,
+            nvme_seq_read_gbps=nvme_read,
+            nvme_seq_write_gbps=nvme_write,
+            pcie_bandwidth_gbps=pcie_gbps,
             gpu_interconnect_gbps=(
-                600.0 if interconnect == InterconnectType.NVLINK else 15.8
+                600.0 if interconnect == InterconnectType.NVLINK else pcie_gbps
             ),
             interconnect=interconnect,
             node_count=1,

@@ -94,7 +94,7 @@ class TestCoreModels(unittest.TestCase):
             supports_flash_attn2=True, supports_fp8=True,
             nvlink_peer_ids=()
         )
-        self.assertEqual(spec.tier, HardwareTier.DATACENTER)
+        self.assertEqual(spec.tier, HardwareTier.PROSUMER)
 
     def test_hardware_topology_frozen(self):
         from egx.core.models import HardwareTopology
@@ -131,11 +131,11 @@ class TestMemoryValue(unittest.TestCase):
         mv = MemoryValue(1024)
         self.assertEqual(mv.bytes, 1024)
 
-    def test_bool_accepted_as_int(self):
+    def test_bool_rejected(self):
         from egx.core.memory.value import MemoryValue
-        # MemoryValue silently converts bool to int (0 or 1)
-        mv = MemoryValue(True)
-        self.assertEqual(mv.bytes, 1)
+        from egx.core.exceptions import BoolAsIntError
+        with self.assertRaises(BoolAsIntError):
+            MemoryValue(True)
 
     def test_negative_rejected(self):
         from egx.core.memory.value import MemoryValue

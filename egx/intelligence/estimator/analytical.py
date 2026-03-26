@@ -37,6 +37,8 @@ class AnalyticalEstimator(BaseEstimator):
     Used for initial strategy pruning and fallbacks.
     """
 
+    __slots__ = ()
+
     # Multipliers for activation memory (varies by strategy)
     ACTIVATION_FACTOR_DEFAULT = 34.0  # approximate bits per token-layer
 

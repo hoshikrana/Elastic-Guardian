@@ -27,6 +27,8 @@ from .enums import (
 
 @dataclass(frozen=True, slots=True)
 class GPUSpec:
+    """Snapshot of a single GPU's capabilities and current state."""
+
     device_id: int
     name: str
     vram_bytes: int  # bytes ONLY (Law 10)
@@ -41,7 +43,7 @@ class GPUSpec:
 
     @property
     def vram_gb(self) -> float:
-        return self.vram_bytes / 1e9
+        return self.vram_bytes / (1024 ** 3)
 
     @property
     def tier(self) -> HardwareTier:
@@ -97,10 +99,12 @@ class ModelProfile:
 
 @dataclass(frozen=True, slots=True)
 class MemoryReport:
+    """Aggregated memory state of a hardware node or cluster."""
+
     weights_bytes: int
     activations_bytes: int
     optimizer_bytes: int
-    gradient_bytes: int
+    gradients_bytes: int
     overhead_bytes: int
     total_bytes: int
     method: EstimationMethod
@@ -110,7 +114,7 @@ class MemoryReport:
 
     @property
     def total_gb(self) -> float:
-        return self.total_bytes / 1e9
+        return self.total_bytes / (1024**3)
 
     def __add__(self, other: MemoryReport) -> MemoryReport:
         from .exceptions import MemoryOverflowError
@@ -123,7 +127,7 @@ class MemoryReport:
             weights_bytes=self.weights_bytes + other.weights_bytes,
             activations_bytes=self.activations_bytes + other.activations_bytes,
             optimizer_bytes=self.optimizer_bytes + other.optimizer_bytes,
-            gradient_bytes=self.gradient_bytes + other.gradient_bytes,
+            gradients_bytes=self.gradients_bytes + other.gradients_bytes,
             overhead_bytes=self.overhead_bytes + other.overhead_bytes,
             total_bytes=total,
             method=self.method,

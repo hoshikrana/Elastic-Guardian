@@ -6,17 +6,35 @@ true Polymorphism and Dependency Inversion in the EGX runtime.
 Developer extension plugins must inherit these interfaces.
 """
 
+from __future__ import annotations
+ 
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional
 
-from egx.core.models import GPUSpec, HardwareTopology
+from egx.core.models import (
+    GPUSpec, 
+    HardwareTopology, 
+    MemoryReport, 
+    ModelProfile, 
+    TrainingPlan
+)
 
 class BaseGPUProber(ABC):
     """Architectural contract for hardware enumeration."""
-    
+
     @abstractmethod
     def probe(self) -> List[GPUSpec]:
         """Probes the physical hardware and returns a list of specifications."""
+        pass
+
+    @abstractmethod
+    def __enter__(self) -> BaseGPUProber:
+        """Initialize hardware context."""
+        pass
+
+    @abstractmethod
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Shutdown hardware context and release resources."""
         pass
 
 
@@ -88,4 +106,15 @@ class BaseStrategySelector(ABC):
     
     @abstractmethod
     def extract_max(self) -> Any: pass
+
+
+class BaseEstimator(ABC):
+    """Architectural contract for structural memory estimation."""
+
+    @abstractmethod
+    def estimate(
+        self, topology: HardwareTopology, profile: ModelProfile, plan: TrainingPlan
+    ) -> MemoryReport:
+        """Calculates estimated memory requirements."""
+        pass
 

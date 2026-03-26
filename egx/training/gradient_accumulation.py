@@ -18,10 +18,15 @@ class GradientAccumulator:
     Calculates step boundaries and scaling factors.
     """
 
+    __slots__ = ("target_steps", "current_step", "total_accumulated")
+
     def __init__(self, target_steps: int):
-        self.target_steps = target_steps
+        self.target_steps = max(1, target_steps)
         self.current_step = 0
         self.total_accumulated = 0
+
+    def __repr__(self) -> str:
+        return f"GradientAccumulator(target={self.target_steps}, current={self.current_step})"
 
     def should_step(self) -> bool:
         """Returns True if normalized gradients should be applied now."""

@@ -22,10 +22,23 @@ class LoRAMerger:
         """
         Zero-copy (where possible) weight merge.
         """
+        import torch
+        from egx.peft.lora import LoRALinear
+        
         logger.info("PEFT: Starting LoRA weights merge...")
-        # Walking model to find adapters
-        # For each adapter:
-        # base_weight.data += (lora_b.data @ lora_a.data) * scaling
+        count = 0
+        for name, module in list(model.named_modules()):
+            if isinstance(module, LoRALinear):
+                # Compute W = W_base + (B @ A) * scaling
+                with torch.no_grad():
+                    lora_update = (module.lora_B @ module.lora_A) * module.scaling
+                    module.original.weight.data += lora_update
+                
+                # Replace LoRALinear with the original nn.Linear in the parent
+                parent_name, attr_name = name.rsplit(".", 1) if "." in name else ("", name)
+                parent = dict(model.named_modules())[parent_name] if parent_name else model
+                setattr(parent, attr_name, module.original)
+                count += 1
 
-        logger.info("PEFT: Merge complete. Adapters fully integrated into base.")
+        logger.info(f"PEFT: Merge complete. {count} adapters fully integrated into base.")
         return model

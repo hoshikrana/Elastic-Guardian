@@ -5,12 +5,7 @@ No logic. No classes. No functions. Constants only.
 """
 
 from .enums import TrainingMode
-
-# Units (Law 10: all arithmetic uses int bytes)
-KB = 1024
-MB = 1024 * 1024
-GB = 1024 * 1024 * 1024
-TB = 1024 * 1024 * 1024 * 1024
+from .memory.units import KB, MB, GB, TB  # noqa: F401 — canonical source
 
 # System Constants
 WATCHDOG_TIMEOUT_S = 30.0

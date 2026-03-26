@@ -12,43 +12,71 @@ import logging
 import pynvml
 import torch
 from typing import List, Tuple, Any
-from egx.core.models import GPUSpec
+from egx.core.device import get_default_device
+from egx.core.models import GPUSpec, HardwareTier
 from egx.core.interfaces import BaseGPUProber
 
 logger = logging.getLogger("egx.infrastructure.gpu")
 
+# Approximate performance metrics lookup (Bandwidth GB/s, FP16 TFLOPS, BF16 TFLOPS)
+GPU_SPECS_LOOKUP = {
+    "RTX 4090": {"bw": 1008.0, "fp16": 82.6, "bf16": 82.6},
+    "RTX 3090": {"bw": 936.0, "fp16": 35.6, "bf16": 35.6},
+    "A100": {"bw": 1555.0, "fp16": 312.0, "bf16": 312.0},
+    "H100": {"bw": 3350.0, "fp16": 989.0, "bf16": 989.0},
+    "RTX 4080": {"bw": 716.0, "fp16": 48.7, "bf16": 48.7},
+    "RTX 3080": {"bw": 760.0, "fp16": 29.8, "bf16": 29.8},
+}
 
 class GPUProber(BaseGPUProber):
     """
-    Law 1: One file, one responsibility (GPU probing).
-    Law 9: Log every degradation.
+    Production-grade GPU prober.
+    Uses NVML with fallback to Torch and MPS.
     """
+
+    __slots__ = ("_nvml_initialized",)
 
     def __init__(self):
         self._nvml_initialized = False
 
-    def _init_nvml(self) -> bool:
+    def __enter__(self) -> GPUProber:
         try:
             pynvml.nvmlInit()
             self._nvml_initialized = True
-            return True
         except Exception as e:
-            logger.warning(f"NVML Init failed: {e}. Falling back to nvidia-smi/torch.")
-            return False
+            logger.warning("NVML Initialization failed: %s", e)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        if self._nvml_initialized:
+            try:
+                pynvml.nvmlShutdown()
+            except Exception as e:
+                logger.error("NVML Shutdown failed: %s", e)
+            finally:
+                self._nvml_initialized = False
+
+    def __del__(self):
+        """Ensure NVML is properly shut down."""
+        if self._nvml_initialized:
+            try:
+                pynvml.nvmlShutdown()
+            except Exception:
+                pass
 
     def probe(self) -> List[GPUSpec]:
         """Probes all available GPUs via the best available method."""
         gpus = []
 
         # Method 1: NVML (Best for topology/bandwidth)
-        if self._init_nvml():
+        if self._nvml_initialized:
             try:
                 gpus = self._probe_nvml()
             except Exception as e:
-                logger.error(f"NVML Probe failed: {e}. Trying fallback.")
+                logger.error("NVML Probe failed: %s. Trying fallback.", e)
 
         # Method 2: Torch (Fallback for basic stats)
-        if not gpus and torch.cuda.is_available():
+        if not gpus and get_default_device() == "cuda":
             gpus = self._probe_torch()
 
         # Method 3: Apple Silicon (MPS)
@@ -79,6 +107,20 @@ class GPUProber(BaseGPUProber):
             vendor="cpu",
         )
 
+    def _get_hw_metrics(self, name: str, cap_major: int) -> Tuple[float, float, float]:
+        """Returns (bandwidth_gbps, fp16_tflops, bf16_tflops) from lookup or heuristic."""
+        for key, stats in GPU_SPECS_LOOKUP.items():
+            if key.lower() in name.lower():
+                return stats["bw"], stats["fp16"], stats["bf16"]
+        
+        # Defaults based on compute capability
+        if cap_major >= 9:
+            return 2000.0, 500.0, 500.0
+        elif cap_major >= 8:
+            return 900.0, 50.0, 50.0
+        else:
+            return 400.0, 15.0, 15.0
+
     def _probe_nvml(self) -> List[GPUSpec]:
         gpus = []
         device_count = pynvml.nvmlDeviceGetCount()
@@ -96,15 +138,16 @@ class GPUProber(BaseGPUProber):
             # Bandwidth (Approximation or fixed lookup)
             # For simplicity in this v1.0, we use compute capability to infer features
             supports_fa2 = cap_major >= 8  # Ampere+
+            bw, fp16, bf16 = self._get_hw_metrics(name, cap_major)
 
             spec = GPUSpec(
                 device_id=i,
                 name=name,
                 vram_bytes=int(mem_info.total),  # Law 10
                 compute_capability=(cap_major, cap_minor),
-                memory_bandwidth_gbps=900.0,  # Placeholder, updated by sampler
-                fp16_tflops=30.0,
-                bf16_tflops=30.0,
+                memory_bandwidth_gbps=bw,
+                fp16_tflops=fp16,
+                bf16_tflops=bf16,
                 supports_flash_attn2=supports_fa2,
                 supports_fp8=(cap_major >= 9),  # Hopper+
                 nvlink_peer_ids=self._get_peer_ids(handle, device_count),
@@ -119,15 +162,16 @@ class GPUProber(BaseGPUProber):
             name = torch.cuda.get_device_name(i)
             vram = torch.cuda.get_device_properties(i).total_memory
             cap = torch.cuda.get_device_capability(i)
+            bw, fp16, bf16 = self._get_hw_metrics(name, cap[0])
 
             spec = GPUSpec(
                 device_id=i,
                 name=name,
                 vram_bytes=int(vram),
                 compute_capability=cap,
-                memory_bandwidth_gbps=400.0,
-                fp16_tflops=15.0,
-                bf16_tflops=15.0,
+                memory_bandwidth_gbps=bw,
+                fp16_tflops=fp16,
+                bf16_tflops=bf16,
                 supports_flash_attn2=(cap[0] >= 8),
                 supports_fp8=(cap[0] >= 9),
                 nvlink_peer_ids=(),

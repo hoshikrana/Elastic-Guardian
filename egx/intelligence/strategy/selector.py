@@ -10,6 +10,8 @@ from __future__ import annotations
 import math
 from typing import Any, List, Optional
 
+from egx.core.interfaces import BaseStrategySelector
+
 
 class FibNode:
     __slots__ = ("key", "value", "parent", "child", "left", "right", "degree", "mark")
@@ -23,7 +25,6 @@ class FibNode:
         self.right: FibNode = self
         self.degree: int = 0
         self.mark: bool = False
-from egx.core.interfaces import BaseStrategySelector
 
 
 class FibonacciHeap(BaseStrategySelector):
@@ -115,9 +116,10 @@ class FibonacciHeap(BaseStrategySelector):
                 self._cascading_cut(z)
 
     def _consolidate(self):
-        # D(n) = log_phi(n)
-        d = int(math.log(self.total_nodes, 1.618)) + 2
-        a = [None] * d
+        if self.total_nodes <= 0:
+            return
+        d = int(math.log(max(self.total_nodes, 1), 1.618)) + 2
+        a: List[Optional[FibNode]] = [None] * d
 
         nodes = self._get_list(self.max_node)
         for w in nodes:
@@ -170,3 +172,6 @@ class FibonacciHeap(BaseStrategySelector):
             res.append(curr)
             curr = curr.right
         return res
+
+    def __repr__(self) -> str:
+        return f"FibonacciHeap(nodes={self.total_nodes})"

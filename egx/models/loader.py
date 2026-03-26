@@ -1,73 +1,68 @@
 """
-EGX Model Loader — Layer 5.
+EGX Model Loader — Layer 7.
 
-Hardware-aware transformer loading with sharding and quantization support.
-Integrates with Layer 1 memory budgets for safe loading.
+Handles dynamic model loading from HuggingFace Hub or local paths.
 """
 
 from __future__ import annotations
 
-import torch
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
+import torch
 
-# Optional depends on transformers/peft being available
 try:
-    from transformers import AutoModelForCausalLM, AutoConfig
+    from transformers import AutoModelForCausalLM, AutoTokenizer
 except ImportError:
     AutoModelForCausalLM = None
-    AutoConfig = None
+    AutoTokenizer = None
 
 logger = logging.getLogger("egx.models.loader")
 
 
-class ModelLoader:
+class AutoModelLoader:
     """
-    The automated entry point for any model.
+    Seamless model loading for HuggingFace Transformers.
     """
 
-    def __init__(self, cache_dir: Optional[str] = None):
-        self.cache_dir = cache_dir
-
-    def load(self, model_id: str, device: str = "cpu", quantize: bool = False) -> Any:
+    @staticmethod
+    def from_pretrained(
+        pretrained_model_name_or_path: str,
+        dtype: Optional[torch.dtype] = None,
+        device_map: str = "auto",
+        token: Optional[str] = None,
+        load_tokenizer: bool = True,
+        **kwargs
+    ) -> Tuple[Any, Optional[Any]]:
         """
-        Loads a model with optimal settings for the current device.
+        Loads a model and optionally its tokenizer.
         """
-        logger.info(f"Loading model {model_id} on {device} (quantize={quantize})...")
-
         if AutoModelForCausalLM is None:
-            logger.warning(
-                "Transformers not found. Returning a mock model for testing."
-            )
-            return self._mock_model()
+            raise ImportError("transformers module is required for AutoModelLoader")
 
-        load_kwargs = {
-            "device_map": "auto" if device == "cuda" else {"": device},
-            "trust_remote_code": True,
-            "cache_dir": self.cache_dir,
-        }
-
-        if quantize:
-            load_kwargs["load_in_4bit"] = True
-            load_kwargs["bnb_4bit_compute_dtype"] = torch.bfloat16
-
-        return AutoModelForCausalLM.from_pretrained(model_id, **load_kwargs)
-
-    def _mock_model(self) -> Any:
-        """A simple mock to satisfy Layer 5/stress tests without torch/transformers."""
-
-        class MockModel:
-            def __init__(self):
-                self.config = {"hidden_size": 4096}
-
-            def to(self, *args, **kwargs):
-                return self
-
-            def __call__(self, **kwargs):
-                class Out:
-                    def __init__(self):
-                        self.loss = torch.tensor(0.0)
-
-                return Out()
-
-        return MockModel()
+        logger.info(f"Loading model '{pretrained_model_name_or_path}'...")
+        
+        # Default to memory-efficient dtype
+        dtype = dtype or torch.float16
+        
+        model = AutoModelForCausalLM.from_pretrained(
+            pretrained_model_name_or_path,
+            torch_dtype=dtype,
+            device_map=device_map,
+            token=token,
+            **kwargs
+        )
+        
+        tokenizer = None
+        if load_tokenizer:
+            try:
+                tokenizer = AutoTokenizer.from_pretrained(
+                    pretrained_model_name_or_path,
+                    token=token,
+                )
+                if tokenizer.pad_token is None:
+                    tokenizer.pad_token = tokenizer.eos_token
+            except Exception as e:
+                logger.warning(f"Failed to load tokenizer for {pretrained_model_name_or_path}: {e}")
+                
+        logger.info("Model load complete.")
+        return model, tokenizer

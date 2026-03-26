@@ -9,7 +9,11 @@ from __future__ import annotations
 
 import sys
 from typing import Any, Union
-from egx.core.exceptions import MemoryOverflowError, NegativeMemoryError
+from egx.core.exceptions import (
+    BoolAsIntError,
+    MemoryOverflowError,
+    NegativeMemoryError,
+)
 
 
 class MemoryValue:
@@ -24,10 +28,9 @@ class MemoryValue:
         if isinstance(val, MemoryValue):
             val = val._bytes
 
-        # Law 10: Explicit check for bool as int trap
+        # Law 10: Reject bool masquerading as int
         if isinstance(val, bool):
-            # This would be caught by validators too, but we harden here.
-            val = int(val)
+            raise BoolAsIntError("MemoryValue", val)
 
         if val < 0:
             raise NegativeMemoryError("MemoryValue", val)
@@ -75,3 +78,14 @@ class MemoryValue:
 
     def __int__(self) -> int:
         return self._bytes
+
+    def __hash__(self) -> int:
+        return hash(self._bytes)
+
+    def __gt__(self, other: Union[int, MemoryValue]) -> bool:
+        other_val = other.bytes if isinstance(other, MemoryValue) else other
+        return self._bytes > other_val
+
+    def __ge__(self, other: Union[int, MemoryValue]) -> bool:
+        other_val = other.bytes if isinstance(other, MemoryValue) else other
+        return self._bytes >= other_val

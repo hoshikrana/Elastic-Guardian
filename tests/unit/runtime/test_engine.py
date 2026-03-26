@@ -8,13 +8,11 @@ from egx.api.trainer import EGX
 class TestEGXEngine(unittest.TestCase):
     def test_boot_sequence(self):
         egx = EGX()
-        class MockModel:
+        class MockModel(torch.nn.Module):
             def __init__(self):
+                super().__init__()
                 self.p = torch.nn.Parameter(torch.randn(1))
-            def parameters(self): return [self.p]
-            def named_parameters(self): return [("p", self.p)]
-            def named_modules(self): return [("", self)]
-            def __call__(self, **kwargs):
+            def forward(self, **kwargs):
                 class Out: 
                     def __init__(self, p): self.loss = p.sum()
                 return Out(self.p)
