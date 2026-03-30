@@ -94,7 +94,7 @@ class TestCoreModels(unittest.TestCase):
             supports_flash_attn2=True, supports_fp8=True,
             nvlink_peer_ids=()
         )
-        self.assertEqual(spec.tier, HardwareTier.PROSUMER)
+        self.assertEqual(spec.tier, HardwareTier.DATACENTER)
 
     def test_hardware_topology_frozen(self):
         from egx.core.models import HardwareTopology

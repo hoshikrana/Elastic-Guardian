@@ -7,6 +7,7 @@ Coordinates the interaction between the model, optimizer, and resilience layers.
 
 from __future__ import annotations
 
+import inspect
 import logging
 from typing import Any, Dict, Optional, Union, Callable, List
 
@@ -22,6 +23,7 @@ from egx.core.exceptions import EGXError, OutOfMemoryError
 from egx.resilience.watchdog import TrainingWatchdog
 from egx.resilience.checkpoint.manager import CheckpointManager
 from egx.core.device import get_default_device, get_device_type
+from egx.training.loss_strategies import LossFunctionFactory, LossFunctionStrategy
 from egx.core.interfaces import (
     BaseTrainingKernel,
     BaseWatchdog,
@@ -42,6 +44,7 @@ class TrainingKernel(BaseTrainingKernel):
         "watchdog",
         "checkpoint_mgr",
         "loss_fn",
+        "loss_strategy",
         "callbacks",
         "precision_override",
         "max_grad_norm",
@@ -68,6 +71,8 @@ class TrainingKernel(BaseTrainingKernel):
         self.watchdog = watchdog
         self.checkpoint_mgr = checkpoint_mgr
         self.loss_fn = loss_fn
+        # Create loss strategy using factory (eliminates string matching from train_step)
+        self.loss_strategy = LossFunctionFactory.create(loss_fn)
         self.callbacks = callbacks or []
         self.precision_override = precision_override
         self.max_grad_norm = max_grad_norm
@@ -148,41 +153,23 @@ class TrainingKernel(BaseTrainingKernel):
 
             with torch.amp.autocast(device_type=device_type, dtype=target_dtype):
                 # ── Model Forward ──
-                try:
-                    # Attempt HF-style forward where labels are passed for internal loss calc
-                    outputs = self.model(**batch)
-                except TypeError as e:
-                    if "unexpected keyword argument 'labels'" in str(e):
-                        # Fallback for standard PyTorch modules (labels used externally)
-                        model_inputs = {k: v for k, v in batch.items() if k != "labels"}
-                        # If it's a single input, we might need to pass it as positionals or just the value
-                        if len(model_inputs) == 1:
-                            outputs = self.model(next(iter(model_inputs.values())))
-                        else:
-                            outputs = self.model(**model_inputs)
-                    else:
-                        raise
+                # Use introspection to see if 'labels' is supported (or if it takes **kwargs)
+                sig = inspect.signature(self.model.forward)
+                has_labels = "labels" in sig.parameters
+                has_kwargs = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
 
-                # ── Loss Calculation ──
-                if callable(self.loss_fn):
-                    # For custom callables, pass outputs directly (or you could adapt this as needed)
-                    # For simplicity, if they passed a custom loss, we assume it can map (outputs, targets)
-                    # For this demo framework, we just apply it directly to outputs
-                    try:
-                        loss = self.loss_fn(outputs)
-                    except Exception:
-                        loss = outputs.loss if hasattr(outputs, "loss") else outputs.sum()
-                elif isinstance(self.loss_fn, str) and self.loss_fn.lower() == "mse":
-                    if "labels" not in batch:
-                        raise ValueError("MSE loss requires 'labels' in batch")
-                    loss = torch.nn.functional.mse_loss(outputs, batch["labels"])
-                elif isinstance(self.loss_fn, str) and self.loss_fn.lower() in ["cross_entropy", "ce"]:
-                    if "labels" not in batch:
-                        raise ValueError("Cross-Entropy loss requires 'labels' in batch")
-                    loss = torch.nn.functional.cross_entropy(outputs, batch["labels"])
+                if "labels" in batch and not has_labels and not has_kwargs:
+                    model_inputs = {k: v for k, v in batch.items() if k != "labels"}
+                    if len(model_inputs) == 1:
+                        outputs = self.model(next(iter(model_inputs.values())))
+                    else:
+                        outputs = self.model(**model_inputs)
                 else:
-                    # Fallback: check for loss attribute (HuggingFace style)
-                    loss = outputs.loss if hasattr(outputs, "loss") else outputs.sum()
+                    outputs = self.model(**batch)
+
+                # ── Loss Calculation (Now via strategy pattern) ──
+                # This replaces 15+ lines of if/elif branching with a single call
+                loss = self.loss_strategy.compute(outputs, batch)
 
             # Backpropagation and Optimization
             if accelerator:

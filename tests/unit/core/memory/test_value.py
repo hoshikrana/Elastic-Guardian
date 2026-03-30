@@ -10,10 +10,11 @@ class TestMemoryValue(unittest.TestCase):
         mv = MemoryValue(1024)
         self.assertEqual(mv.bytes, 1024)
 
-    def test_bool_accepted_as_int(self):
-        # MemoryValue silently converts bool to int (0 or 1)
-        mv = MemoryValue(True)
-        self.assertEqual(mv.bytes, 1)
+    def test_bool_rejected(self):
+        # Law 10: bools are not allowed as memory ints
+        from egx.core.exceptions import BoolAsIntError
+        with self.assertRaises(BoolAsIntError):
+            MemoryValue(True)
 
     def test_negative_rejected(self):
         with self.assertRaises(NegativeMemoryError):

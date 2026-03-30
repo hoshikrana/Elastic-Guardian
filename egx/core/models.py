@@ -52,7 +52,7 @@ class GPUSpec:
             return HardwareTier.LAPTOP
         if gb <= 48:
             return HardwareTier.WORKSTATION
-        if gb <= 80:
+        if gb < 80:
             return HardwareTier.PROSUMER
         return HardwareTier.DATACENTER
 

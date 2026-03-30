@@ -6,13 +6,15 @@ import unittest
 class TestStartupTime(unittest.TestCase):
     def test_engine_boot_speed(self):
         from egx.runtime.engine import EGXEngine
+        from egx.api.config import EGXConfig
         engine = EGXEngine()
 
         class DummyModel:
             def parameters(self): return []
+            def named_parameters(self): return []
 
         start = time.perf_counter()
-        engine.boot(DummyModel())
+        engine.boot(DummyModel(), EGXConfig())
         elapsed = time.perf_counter() - start
         self.assertLess(elapsed, 5.0, f"Boot took {elapsed:.2f}s, expected < 5s")
 

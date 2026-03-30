@@ -14,11 +14,35 @@ import logging
 import math
 import time
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing_extensions import TypedDict
 
 if TYPE_CHECKING:
     from egx.api.trainer import EGXTrainer
 
 logger = logging.getLogger("egx.api.callbacks")
+
+
+# ──────────────────────────────────────────────────────────────────────
+#  Context Types for Callbacks
+# ──────────────────────────────────────────────────────────────────────
+
+class EpochEndContext(TypedDict, total=False):
+    metrics: Dict[str, float]
+
+
+class StepContext(TypedDict, total=False):
+    batch: Dict[str, Any]
+    grad_norm: float
+    throughput_tokens_per_sec: float
+    checkpoint_saved: bool
+
+
+class ResultContext(TypedDict, total=False):
+    result: Dict[str, Any]
+
+
+class LogContext(TypedDict, total=False):
+    logs: Dict[str, Any]
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -42,21 +66,21 @@ class TrainingCallback:
     def on_train_begin(self, trainer: "EGXTrainer", **kwargs) -> None:
         """Called before the first training step."""
 
-    def on_train_end(self, trainer: "EGXTrainer", result: Dict[str, Any], **kwargs) -> None:
+    def on_train_end(self, trainer: "EGXTrainer", result: Dict[str, Any], **kwargs: ResultContext) -> None:
         """Called after all training is complete."""
 
     # ── Epoch lifecycle ──
     def on_epoch_begin(self, trainer: "EGXTrainer", epoch: int, **kwargs) -> None:
         """Called at the start of each epoch."""
 
-    def on_epoch_end(self, trainer: "EGXTrainer", epoch: int, metrics: Dict[str, float], **kwargs) -> None:
+    def on_epoch_end(self, trainer: "EGXTrainer", epoch: int, metrics: Dict[str, float], **kwargs: EpochEndContext) -> None:
         """Called at the end of each epoch with aggregated metrics."""
 
     # ── Step lifecycle ──
-    def on_step_begin(self, trainer: "EGXTrainer", step: int, **kwargs) -> None:
+    def on_step_begin(self, trainer: "EGXTrainer", step: int, **kwargs: StepContext) -> None:
         """Called before each training step (forward + backward)."""
 
-    def on_step_end(self, trainer: "EGXTrainer", step: int, loss: float, lr: float, **kwargs) -> None:
+    def on_step_end(self, trainer: "EGXTrainer", step: int, loss: float, lr: float, **kwargs: StepContext) -> None:
         """Called after each training step with loss and current lr."""
 
     # ── Gradient hooks ──
@@ -91,7 +115,7 @@ class TrainingCallback:
         """Called when a checkpoint is loaded."""
 
     # ── Logging ──
-    def on_log(self, trainer: "EGXTrainer", logs: Dict[str, Any], **kwargs) -> None:
+    def on_log(self, trainer: "EGXTrainer", logs: Dict[str, Any], **kwargs: LogContext) -> None:
         """Called every logging_steps with aggregated log dict."""
 
 

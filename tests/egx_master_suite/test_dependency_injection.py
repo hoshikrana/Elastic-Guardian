@@ -33,6 +33,10 @@ class MockAMDProber(BaseGPUProber):
             fp16_tflops=1300.0, bf16_tflops=1300.0,
             supports_flash_attn2=True, supports_fp8=True, nvlink_peer_ids=(), vendor="amd"
         )]
+    def __enter__(self) -> 'MockAMDProber':
+        return self
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        pass
 
 class MockCustomTopology(BaseTopologyBuilder):
     """Simulates a custom datacenter topology compiler."""
@@ -89,6 +93,7 @@ class TestDependencyInjection(unittest.TestCase):
 
     def test_engine_custom_prober_and_builder(self):
         """Test if the engine correctly boots using completely custom Hardware layers."""
+        from egx.api.config import EGXConfig
         engine = EGXEngine(
             gpu_prober=MockAMDProber(),
             topology_builder=MockCustomTopology()
@@ -96,8 +101,9 @@ class TestDependencyInjection(unittest.TestCase):
         # We pass a dummy model since introspection checks for .parameters()
         class DummyModel:
             def parameters(self): return []
+            def named_parameters(self): return []
             
-        engine.boot(model=DummyModel())
+        engine.boot(model=DummyModel(), config=EGXConfig())
         topo = engine.topology
         self.assertIsNotNone(topo)
         self.assertEqual(len(topo.gpus), 1)
@@ -117,6 +123,7 @@ class TestDependencyInjection(unittest.TestCase):
         
     def test_kernel_custom_watchdog_and_checkpoint(self):
         """Test if the stateless Kernel triggers custom injected Base Interfaces."""
+        import torch
         import torch.nn as nn
         
         # Dummy linear model to satisfy Kernel
@@ -124,15 +131,19 @@ class TestDependencyInjection(unittest.TestCase):
         
         watchdog = MockSilentWatchdog()
         checkpoint = MockS3CheckpointManager()
+
+        # Use a callable loss function that computes sum
+        def sum_loss(outputs, batch):
+            return outputs.sum()
         
         kernel = TrainingKernel(
             model=model,
             optimizer_type="sgd", # Use simple optimizer to avoid overhead
+            loss_fn=sum_loss,
             watchdog=watchdog,
             checkpoint_mgr=checkpoint
         )
         
-        import torch
         batch = {"input": torch.randn(2, 10)}
         # Override the forward pass to prevent complex tensor destructuring issues in the dummy
         # We must explicitly require gradients or loss.backward() will crash

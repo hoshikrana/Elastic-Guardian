@@ -25,6 +25,7 @@ class CheckpointWriter:
 
     def save(self, data: Dict[str, Any], path: str):
         path_obj = pathlib.Path(path)
+        path_obj.parent.mkdir(parents=True, exist_ok=True)
         tmp_path = path_obj.with_suffix(".tmp")
 
         try:
