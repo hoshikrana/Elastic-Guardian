@@ -36,6 +36,25 @@ python examples/showcase_egx_hardening.py
 
 ---
 
+## 🏛️ Architecture & Engineering Principles
+
+What makes EGX unique isn't just what it does, but *how strictly* it does it. EGX was engineered around **10 Immutable Laws** of framework design to guarantee stability at an enterprise scale. 
+
+**Some core laws include:**
+- **Law 1: Atomic Integrity** — A checkpoint must either be 100% written to disk with SHA-256 verification or not exist at all. No corrupted states.
+- **Law 9: Explicit Fallbacks** — The engine will never silently crash. If hardware thresholds aren't met, EGX calculates the optimal downgrade trajectory (e.g., from Full Fine-Tuning -> LoRA -> CPU inference constraints) dynamically.
+- **Law 10: Absolute Memory Bound** — VRAM logic is never calculated using floats. All architecture constraints operate strictly on deterministic `int` byte measurements via the `MemoryValue` domain driven design.
+
+### The Technical Stack
+EGX doesn't replace the ecosystem; it acts as a resilient intelligence layer mapped over the industry's best tools:
+- **PyTorch Native Engine**: Utilizing `torch.amp.autocast` and raw gradient scaling wrappers within the `EGXKernel`.
+- **HuggingFace Accelerate**: Distributed device mapping and gradient accumulation syncs are delegated confidently to `Accelerator` under the hood.
+- **PEFT (LoRA)**: Native interception of standard `nn.Modules` to map low-rank adapters over dense geometries seamlessly without manual integration.
+- **Safetensors**: EGX exclusively forces dictionary serialization via `safetensors.torch` to prevent arbitrary pickle execution and ensure rapid, deterministic disk reads during Recovery FSM phases.
+- **Pydantic Validation**: All configuration classes map to strict Pydantic schemas enforcing edge-case detection before any VRAM is ever allocated.
+
+---
+
 ## 🧠 Core Capabilities
 
 ### 1. Zero-Configuration Orchestration
