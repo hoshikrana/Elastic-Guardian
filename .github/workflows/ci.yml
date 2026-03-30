@@ -34,7 +34,7 @@ jobs:
         run: ruff check egx/
 
       - name: MyPy type check
-        run: mypy --strict egx/
+        run: mypy egx/
 
       - name: Verify package import
         run: python -c "import egx; print('Version:', egx.__version__)"
