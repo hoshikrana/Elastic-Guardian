@@ -1,8 +1,10 @@
 """
 EGX Test: intelligence/estimator/calibration/cache.py
 """
+
 import unittest
 from egx.intelligence.estimator.calibration.cache import CalibrationCache
+
 
 class TestCalibrationCache(unittest.TestCase):
     def test_put_get(self):
@@ -21,6 +23,7 @@ class TestCalibrationCache(unittest.TestCase):
         cache.put("c", {"v": 3})
         self.assertIsNone(cache.get("a"))
         self.assertIsNotNone(cache.get("b"))
+
 
 if __name__ == "__main__":
     unittest.main()

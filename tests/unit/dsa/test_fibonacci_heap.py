@@ -1,8 +1,10 @@
 """
 EGX Test: intelligence/strategy/selector.py (DSA-1: Fibonacci Heap)
 """
+
 import unittest
 from egx.intelligence.strategy.selector import FibonacciHeap
+
 
 class TestFibonacciHeap(unittest.TestCase):
     def test_insert_extract(self):
@@ -20,6 +22,7 @@ class TestFibonacciHeap(unittest.TestCase):
         h.insert(50.0, "high")
         h.increase_key(node, 60.0)
         self.assertEqual(h.extract_max().value, "mid")
+
 
 if __name__ == "__main__":
     unittest.main()

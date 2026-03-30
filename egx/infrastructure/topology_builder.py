@@ -26,18 +26,21 @@ class TopologyBuilder(BaseTopologyBuilder):
         # NVMe Probe
         try:
             from egx.infrastructure.nvme_probe import NVMeProber
+
             with NVMeProber() as prober:
                 nvme_read, nvme_write, nvme_capacity = prober.probe()
         except Exception as e:
             nvme_read, nvme_write, nvme_capacity = 3.5, 2.5, 100 * 1024 * 1024 * 1024
-            
+
         # PCIe Bandwidth Sample
         pcie_gbps = 15.8
         try:
             if gpus:
                 import torch
+
                 if torch.cuda.is_available():
                     from egx.infrastructure.bandwidth_sampler import BandwidthSampler
+
                     pcie_gbps = BandwidthSampler().sample_pcie(gpus[0].device_id)
         except Exception:
             pass

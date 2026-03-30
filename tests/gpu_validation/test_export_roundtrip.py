@@ -1,4 +1,5 @@
 """GPU Validation: Export roundtrip tests."""
+
 import unittest
 import tempfile
 import os
@@ -18,6 +19,7 @@ class TestExportRoundtrip(unittest.TestCase):
 
     def test_checkpoint_writer_roundtrip(self):
         from egx.resilience.checkpoint.writer import CheckpointWriter
+
         writer = CheckpointWriter()
         state = {"step": 42, "loss": 0.25, "state_dict": {"w": torch.randn(10)}}
         with tempfile.TemporaryDirectory() as tmpdir:

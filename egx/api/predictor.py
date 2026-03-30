@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from egx.core.device import get_default_device
 from egx.core.exceptions import EGXError
+
 try:
     import torch
     import torch.nn as nn
@@ -142,7 +143,7 @@ class EGXPredictor:
             # Decode only the newly generated tokens
             generated_texts = []
             for i, ids in enumerate(output_ids):
-                new_tokens = ids[input_ids.shape[1]:]
+                new_tokens = ids[input_ids.shape[1] :]
                 text = tokenizer.decode(new_tokens, skip_special_tokens=True)
                 generated_texts.append(text)
 
@@ -150,8 +151,14 @@ class EGXPredictor:
 
         # Manual autoregressive fallback for custom models
         return self._manual_generate(
-            model, input_ids, attention_mask, tokenizer,
-            max_new_tokens, temperature, top_k, do_sample,
+            model,
+            input_ids,
+            attention_mask,
+            tokenizer,
+            max_new_tokens,
+            temperature,
+            top_k,
+            do_sample,
         )
 
     def _manual_generate(
@@ -187,7 +194,9 @@ class EGXPredictor:
             # Top-k filtering
             if top_k > 0:
                 top_k_val = min(top_k, logits.size(-1))
-                indices_to_remove = logits < torch.topk(logits, top_k_val)[0][..., -1, None]
+                indices_to_remove = (
+                    logits < torch.topk(logits, top_k_val)[0][..., -1, None]
+                )
                 logits[indices_to_remove] = float("-inf")
 
             # Sample or greedy
@@ -212,7 +221,7 @@ class EGXPredictor:
 
         results = []
         for ids in generated:
-            new_tokens = ids[input_ids.shape[1]:]
+            new_tokens = ids[input_ids.shape[1] :]
             results.append(tokenizer.decode(new_tokens, skip_special_tokens=True))
 
         return results

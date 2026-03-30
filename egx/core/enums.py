@@ -129,7 +129,7 @@ class OptimizerType(str, Enum):
 
     def bytes_per_param(self) -> int:
         """Returns the optimizer state bytes per trainable parameter.
-        
+
         AdamW keeps 2 states (m, v) in FP32 = 8 bytes per param.
         Adam 8-bit keeps 2 states in INT8 = 2 bytes per param.
         Adafactor keeps ~1 state = 4 bytes per param.

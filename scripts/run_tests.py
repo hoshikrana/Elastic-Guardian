@@ -23,7 +23,9 @@ from pathlib import Path
 from typing import Dict, List, Optional
 import logging
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -81,10 +83,11 @@ TEST_SUITES = {
 # Test Runner
 # ============================================================================
 
+
 def run_test_suite(suite_name: str, verbose: bool = False) -> Dict[str, any]:
     """
     Run a test suite and return results.
-    
+
     Returns: Dictionary with test results
     """
     if suite_name not in TEST_SUITES:
@@ -108,14 +111,18 @@ def run_test_suite(suite_name: str, verbose: bool = False) -> Dict[str, any]:
         )
 
         success = result.returncode == 0
-        
+
         return {
             "success": success,
             "suite": suite_name,
             "returncode": result.returncode,
             "timeout": suite["timeout"],
             "stdout": result.stdout if verbose else result.stdout[-500:],
-            "stderr": result.stderr if verbose else result.stderr[-500:] if result.stderr else "",
+            "stderr": (
+                result.stderr
+                if verbose
+                else result.stderr[-500:] if result.stderr else ""
+            ),
         }
 
     except subprocess.TimeoutExpired:
@@ -139,11 +146,12 @@ def run_test_suite(suite_name: str, verbose: bool = False) -> Dict[str, any]:
 # Coverage Report Generation
 # ============================================================================
 
+
 def generate_coverage_report() -> Dict[str, any]:
     """Generate coverage report with detailed breakdown."""
-    logger.info("\n" + "="*60)
+    logger.info("\n" + "=" * 60)
     logger.info("Generating Coverage Report")
-    logger.info("="*60 + "\n")
+    logger.info("=" * 60 + "\n")
 
     try:
         cmd = (
@@ -151,7 +159,7 @@ def generate_coverage_report() -> Dict[str, any]:
             "--cov=egx --cov-report=html --cov-report=term-missing "
             "-q"
         )
-        
+
         result = subprocess.run(
             cmd,
             shell=True,
@@ -161,7 +169,7 @@ def generate_coverage_report() -> Dict[str, any]:
         )
 
         logger.info(result.stdout)
-        
+
         return {
             "success": result.returncode == 0,
             "report_type": "coverage",
@@ -178,10 +186,11 @@ def generate_coverage_report() -> Dict[str, any]:
 # Test Plan Executor
 # ============================================================================
 
+
 def run_testing_plan() -> Dict[str, any]:
     """
     Execute comprehensive testing plan for new testing phase.
-    
+
     Plan:
     1. Unit tests (baseline)
     2. Integration tests (pipelines)
@@ -189,9 +198,9 @@ def run_testing_plan() -> Dict[str, any]:
     4. Monitoring tests (if implemented)
     5. Coverage analysis
     """
-    logger.info("\n" + "="*70)
+    logger.info("\n" + "=" * 70)
     logger.info(" TESTING PHASE - COMPREHENSIVE TEST RUN")
-    logger.info("="*70)
+    logger.info("=" * 70)
 
     suites_to_run = [
         "unit",
@@ -205,7 +214,9 @@ def run_testing_plan() -> Dict[str, any]:
     failed_count = 0
 
     for suite in suites_to_run:
-        logger.info(f"\n[{suites_to_run.index(suite) + 1}/{len(suites_to_run)}] Running {suite}...")
+        logger.info(
+            f"\n[{suites_to_run.index(suite) + 1}/{len(suites_to_run)}] Running {suite}..."
+        )
         result = run_test_suite(suite, verbose=False)
         results[suite] = result
 
@@ -222,13 +233,13 @@ def run_testing_plan() -> Dict[str, any]:
     results["coverage"] = coverage_result
 
     # Summary
-    logger.info("\n" + "="*70)
+    logger.info("\n" + "=" * 70)
     logger.info(" TEST EXECUTION SUMMARY")
-    logger.info("="*70)
+    logger.info("=" * 70)
     logger.info(f"✅ Passed: {passed_count}/{len(suites_to_run)}")
     logger.info(f"❌ Failed: {failed_count}/{len(suites_to_run)}")
     logger.info(f"Coverage Report: {coverage_result.get('html_report', 'N/A')}")
-    logger.info("="*70 + "\n")
+    logger.info("=" * 70 + "\n")
 
     return {
         "total_suites": len(suites_to_run),
@@ -242,6 +253,7 @@ def run_testing_plan() -> Dict[str, any]:
 # ============================================================================
 # Main Entry Point
 # ============================================================================
+
 
 def main():
     parser = argparse.ArgumentParser(description="EGX Testing Phase Runner")
@@ -262,7 +274,8 @@ def main():
         help="Run comprehensive testing plan",
     )
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="store_true",
         help="Verbose output",
     )
@@ -292,7 +305,7 @@ def main():
             # Run single suite
             result = run_test_suite(args.suite, verbose=args.verbose)
             exit_code = 0 if result.get("success") else 1
-            
+
             # Print result
             if result.get("success"):
                 logger.info(f"\n✅ {args.suite} tests PASSED")

@@ -82,7 +82,9 @@ class TrainingKernel(BaseTrainingKernel):
             _OPTIMIZER_REGISTRY = {
                 "adamw": lambda params, lr: torch.optim.AdamW(params, lr=lr),
                 "sgd": lambda params, lr: torch.optim.SGD(params, lr=lr),
-                "adafactor": lambda params, lr: torch.optim.AdamW(params, lr=lr),  # placeholder
+                "adafactor": lambda params, lr: torch.optim.AdamW(
+                    params, lr=lr
+                ),  # placeholder
             }
 
             if callable(optimizer_type):
@@ -92,20 +94,31 @@ class TrainingKernel(BaseTrainingKernel):
                 if factory:
                     self.optimizer = factory(model.parameters(), learning_rate)
                 else:
-                    logger.warning("Unknown optimizer '%s', falling back to AdamW.", optimizer_type)
-                    self.optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+                    logger.warning(
+                        "Unknown optimizer '%s', falling back to AdamW.", optimizer_type
+                    )
+                    self.optimizer = torch.optim.AdamW(
+                        model.parameters(), lr=learning_rate
+                    )
             else:
                 logger.warning("Invalid optimizer_type, falling back to AdamW.")
                 self.optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
-                
-            self.scaler = torch.amp.GradScaler() if get_device_type() == "cuda" else None
-            
+
+            self.scaler = (
+                torch.amp.GradScaler() if get_device_type() == "cuda" else None
+            )
+
             # Scheduler setup
             if scheduler_type and isinstance(scheduler_type, str):
                 if scheduler_type.lower() == "linear":
-                    self.scheduler = torch.optim.lr_scheduler.LinearLR(self.optimizer, total_iters=warmup_steps if warmup_steps > 0 else 100)
+                    self.scheduler = torch.optim.lr_scheduler.LinearLR(
+                        self.optimizer,
+                        total_iters=warmup_steps if warmup_steps > 0 else 100,
+                    )
                 elif scheduler_type.lower() == "cosine":
-                    self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=100)
+                    self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                        self.optimizer, T_max=100
+                    )
                 else:
                     self.scheduler = None
             else:
@@ -148,7 +161,11 @@ class TrainingKernel(BaseTrainingKernel):
             device_type = get_device_type()
             target_dtype = None
             if self.precision_override:
-                mapping = {"fp16": torch.float16, "bf16": torch.bfloat16, "fp32": torch.float32}
+                mapping = {
+                    "fp16": torch.float16,
+                    "bf16": torch.bfloat16,
+                    "fp32": torch.float32,
+                }
                 target_dtype = mapping.get(self.precision_override.lower())
 
             with torch.amp.autocast(device_type=device_type, dtype=target_dtype):
@@ -156,7 +173,10 @@ class TrainingKernel(BaseTrainingKernel):
                 # Use introspection to see if 'labels' is supported (or if it takes **kwargs)
                 sig = inspect.signature(self.model.forward)
                 has_labels = "labels" in sig.parameters
-                has_kwargs = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
+                has_kwargs = any(
+                    p.kind == inspect.Parameter.VAR_KEYWORD
+                    for p in sig.parameters.values()
+                )
 
                 if "labels" in batch and not has_labels and not has_kwargs:
                     model_inputs = {k: v for k, v in batch.items() if k != "labels"}
@@ -176,7 +196,9 @@ class TrainingKernel(BaseTrainingKernel):
                 accelerator.backward(loss)
                 if accelerator.sync_gradients:
                     if self.max_grad_norm > 0:
-                        accelerator.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
+                        accelerator.clip_grad_norm_(
+                            self.model.parameters(), self.max_grad_norm
+                        )
                     self.optimizer.step()
                     self.optimizer.zero_grad()
                     if self.scheduler:
@@ -189,14 +211,18 @@ class TrainingKernel(BaseTrainingKernel):
                     if should_optimizer_step:
                         if self.max_grad_norm > 0:
                             self.scaler.unscale_(self.optimizer)
-                            torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
+                            torch.nn.utils.clip_grad_norm_(
+                                self.model.parameters(), self.max_grad_norm
+                            )
                         self.scaler.step(self.optimizer)
                         self.scaler.update()
                 else:
                     scaled_loss.backward()
                     if should_optimizer_step:
                         if self.max_grad_norm > 0:
-                            torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
+                            torch.nn.utils.clip_grad_norm_(
+                                self.model.parameters(), self.max_grad_norm
+                            )
                         self.optimizer.step()
 
                 if should_optimizer_step and self.scheduler:
@@ -216,7 +242,9 @@ class TrainingKernel(BaseTrainingKernel):
                 try:
                     callback(step, loss_val)
                 except Exception as e:
-                    logger.warning(f"Callback {callback.__name__} failed at step {step}: {e}")
+                    logger.warning(
+                        f"Callback {callback.__name__} failed at step {step}: {e}"
+                    )
 
             return loss_val
 
@@ -240,4 +268,6 @@ class TrainingKernel(BaseTrainingKernel):
 
     def __repr__(self) -> str:
         opt_name = type(self.optimizer).__name__ if self.optimizer else "None"
-        return f"TrainingKernel(optimizer={opt_name}, max_grad_norm={self.max_grad_norm})"
+        return (
+            f"TrainingKernel(optimizer={opt_name}, max_grad_norm={self.max_grad_norm})"
+        )

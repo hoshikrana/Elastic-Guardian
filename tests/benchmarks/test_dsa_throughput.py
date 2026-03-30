@@ -1,4 +1,5 @@
 """Benchmark: All DSA structures under sustained load."""
+
 import time
 import unittest
 
@@ -6,6 +7,7 @@ import unittest
 class TestDSAThroughput(unittest.TestCase):
     def test_fibonacci_heap_10k_ops(self):
         from egx.intelligence.strategy.selector import FibonacciHeap
+
         h = FibonacciHeap()
         start = time.perf_counter()
         for i in range(10_000):
@@ -17,6 +19,7 @@ class TestDSAThroughput(unittest.TestCase):
 
     def test_red_black_tree_10k_ops(self):
         from egx.intelligence.estimator.calibration.store import RedBlackTree
+
         t = RedBlackTree()
         start = time.perf_counter()
         for i in range(10_000):
@@ -28,6 +31,7 @@ class TestDSAThroughput(unittest.TestCase):
 
     def test_skip_list_10k_ops(self):
         from egx.orchestration.pressure.monitor import PressureEventSkipList
+
         sl = PressureEventSkipList()
         start = time.perf_counter()
         for i in range(10_000):
@@ -37,6 +41,7 @@ class TestDSAThroughput(unittest.TestCase):
 
     def test_segment_tree_10k_ops(self):
         from egx.intelligence.estimator.dryrun import MemorySegmentTree
+
         st = MemorySegmentTree(16384)
         start = time.perf_counter()
         for i in range(10_000):

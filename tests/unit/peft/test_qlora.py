@@ -1,10 +1,12 @@
 """
 EGX Test: peft/qlora.py
 """
+
 import unittest
 import torch
 import torch.nn as nn
 from egx.peft.qlora import QuantizedLinear
+
 
 class TestQLoRA(unittest.TestCase):
     def test_quantized_linear(self):
@@ -13,6 +15,7 @@ class TestQLoRA(unittest.TestCase):
         x = torch.randn(2, 64)
         out = q(x)
         self.assertEqual(out.shape, (2, 32))
+
 
 if __name__ == "__main__":
     unittest.main()

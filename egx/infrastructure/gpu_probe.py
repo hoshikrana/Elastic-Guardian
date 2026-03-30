@@ -28,6 +28,7 @@ GPU_SPECS_LOOKUP = {
     "RTX 3080": {"bw": 760.0, "fp16": 29.8, "bf16": 29.8},
 }
 
+
 class GPUProber(BaseGPUProber):
     """
     Production-grade GPU prober.
@@ -112,7 +113,7 @@ class GPUProber(BaseGPUProber):
         for key, stats in GPU_SPECS_LOOKUP.items():
             if key.lower() in name.lower():
                 return stats["bw"], stats["fp16"], stats["bf16"]
-        
+
         # Defaults based on compute capability
         if cap_major >= 9:
             return 2000.0, 500.0, 500.0

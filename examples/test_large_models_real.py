@@ -22,8 +22,7 @@ from typing import Dict, List, Optional
 import torch
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -80,18 +79,25 @@ MODEL_CONFIGS = {
 # 1. Memory Estimation Tests
 # ============================================================================
 
+
 def test_memory_estimation(model_name: str, batch_size: int = None) -> Dict:
     """
     Estimate memory usage for a model configuration.
-    
+
     Returns: Dictionary with memory estimates
     """
     from egx.core.models import GPUSpec, HardwareTopology, ModelProfile, TrainingPlan
     from egx.core.enums import (
-        ArchType, DType, OptimizerType, ParallelStrategy,
-        InterconnectType, TrainingMode,
+        ArchType,
+        DType,
+        OptimizerType,
+        ParallelStrategy,
+        InterconnectType,
+        TrainingMode,
     )
-    from egx.intelligence.estimator.improved_analytical import ImprovedAnalyticalEstimator
+    from egx.intelligence.estimator.improved_analytical import (
+        ImprovedAnalyticalEstimator,
+    )
 
     logger.info(f"\n{'='*60}")
     logger.info(f"MEMORY ESTIMATION: {model_name}")
@@ -216,13 +222,17 @@ def test_memory_estimation(model_name: str, batch_size: int = None) -> Dict:
 # 2. Recovery Orchestrator Tests
 # ============================================================================
 
+
 async def test_recovery_orchestrator(batch_size: int = 16) -> Dict:
     """
     Test recovery orchestrator with simulated OOM scenarios.
-    
+
     Returns: Test results
     """
-    from egx.resilience.recovery.orchestrator import RecoveryOrchestrator, RecoveryContext
+    from egx.resilience.recovery.orchestrator import (
+        RecoveryOrchestrator,
+        RecoveryContext,
+    )
     from egx.core.exceptions import OutOfMemoryError
 
     logger.info(f"\n{'='*60}")
@@ -278,6 +288,7 @@ async def test_recovery_orchestrator(batch_size: int = 16) -> Dict:
 # 3. Model Capability Matrix
 # ============================================================================
 
+
 def generate_capability_matrix() -> str:
     """Generate a matrix showing which models fit on which GPUs with which configs."""
     logger.info(f"\n{'='*60}")
@@ -286,10 +297,16 @@ def generate_capability_matrix() -> str:
 
     from egx.core.models import GPUSpec, HardwareTopology, ModelProfile, TrainingPlan
     from egx.core.enums import (
-        ArchType, DType, OptimizerType, ParallelStrategy,
-        InterconnectType, TrainingMode,
+        ArchType,
+        DType,
+        OptimizerType,
+        ParallelStrategy,
+        InterconnectType,
+        TrainingMode,
     )
-    from egx.intelligence.estimator.improved_analytical import ImprovedAnalyticalEstimator
+    from egx.intelligence.estimator.improved_analytical import (
+        ImprovedAnalyticalEstimator,
+    )
 
     gpus = {
         "A100-40GB": {"vram": 40, "vendor": "nvidia"},
@@ -404,10 +421,9 @@ def generate_capability_matrix() -> str:
 # Main Test Runner
 # ============================================================================
 
+
 async def main():
-    parser = argparse.ArgumentParser(
-        description="Test EGX framework with large models"
-    )
+    parser = argparse.ArgumentParser(description="Test EGX framework with large models")
     parser.add_argument(
         "--model",
         choices=list(MODEL_CONFIGS.keys()),
@@ -447,7 +463,7 @@ async def main():
             all_results = {}
             for model_name in MODEL_CONFIGS.keys():
                 all_results[model_name] = test_memory_estimation(model_name)
-            
+
             # Save results
             results_file = Path("large_model_test_results.json")
             with open(results_file, "w") as f:
@@ -460,7 +476,8 @@ async def main():
 
             if args.test_recovery:
                 recovery_results = await test_recovery_orchestrator(
-                    batch_size=args.batch_size or MODEL_CONFIGS[args.model]["recommended_batch_size"]
+                    batch_size=args.batch_size
+                    or MODEL_CONFIGS[args.model]["recommended_batch_size"]
                 )
                 logger.info("\nRecovery test results:")
                 logger.info(json.dumps(recovery_results, indent=2))

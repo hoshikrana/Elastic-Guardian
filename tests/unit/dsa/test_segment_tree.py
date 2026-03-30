@@ -1,8 +1,10 @@
 """
 EGX Test: intelligence/estimator/dryrun.py (DSA-4: Segment Tree)
 """
+
 import unittest
 from egx.intelligence.estimator.dryrun import MemorySegmentTree
+
 
 class TestSegmentTree(unittest.TestCase):
     def test_range_max(self):
@@ -12,6 +14,7 @@ class TestSegmentTree(unittest.TestCase):
         st.update(5, 200)
         self.assertEqual(st.query_max(0, 4), 500)
         self.assertEqual(st.global_peak(), 500)
+
 
 if __name__ == "__main__":
     unittest.main()

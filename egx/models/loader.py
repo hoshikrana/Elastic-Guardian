@@ -31,7 +31,7 @@ class AutoModelLoader:
         device_map: str = "auto",
         token: Optional[str] = None,
         load_tokenizer: bool = True,
-        **kwargs
+        **kwargs,
     ) -> Tuple[Any, Optional[Any]]:
         """
         Loads a model and optionally its tokenizer.
@@ -40,18 +40,18 @@ class AutoModelLoader:
             raise ImportError("transformers module is required for AutoModelLoader")
 
         logger.info(f"Loading model '{pretrained_model_name_or_path}'...")
-        
+
         # Default to memory-efficient dtype
         dtype = dtype or torch.float16
-        
+
         model = AutoModelForCausalLM.from_pretrained(
             pretrained_model_name_or_path,
             torch_dtype=dtype,
             device_map=device_map,
             token=token,
-            **kwargs
+            **kwargs,
         )
-        
+
         tokenizer = None
         if load_tokenizer:
             try:
@@ -62,7 +62,9 @@ class AutoModelLoader:
                 if tokenizer.pad_token is None:
                     tokenizer.pad_token = tokenizer.eos_token
             except Exception as e:
-                logger.warning(f"Failed to load tokenizer for {pretrained_model_name_or_path}: {e}")
-                
+                logger.warning(
+                    f"Failed to load tokenizer for {pretrained_model_name_or_path}: {e}"
+                )
+
         logger.info("Model load complete.")
         return model, tokenizer

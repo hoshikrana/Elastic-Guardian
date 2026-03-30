@@ -1,8 +1,10 @@
 """
 EGX Test: runtime/config_loader.py (DSA-8: Trie)
 """
+
 import unittest
 from egx.runtime.config_loader import ConfigTrie
+
 
 class TestTrie(unittest.TestCase):
     def test_insert_get(self):
@@ -18,6 +20,7 @@ class TestTrie(unittest.TestCase):
         t.insert("other.c", 3)
         results = t.find_by_prefix("core")
         self.assertEqual(len(results), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,7 +1,7 @@
 """
 EGX Model Validator — Layer 6.
 
-Provides strict validation of model weights and gradients to prevent 
+Provides strict validation of model weights and gradients to prevent
 silent training failures (NaN/Inf).
 """
 
@@ -10,11 +10,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class ModelValidator:
     """
     Utility to validate model health before and during training.
     """
-    
+
     __slots__ = ()
 
     @staticmethod

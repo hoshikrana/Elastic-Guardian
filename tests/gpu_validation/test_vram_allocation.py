@@ -1,4 +1,5 @@
 """GPU Validation: VRAM allocation and memory budget tests."""
+
 import unittest
 import torch
 
@@ -18,6 +19,7 @@ class TestVRAMAllocation(unittest.TestCase):
 
 class TestVRAMAllocationCPUFallback(unittest.TestCase):
     """Always-passing tests that verify CPU fallback logic."""
+
     def test_cpu_tensor_allocation(self):
         t = torch.randn(1000, 1000)
         self.assertEqual(t.device.type, "cpu")
@@ -26,6 +28,7 @@ class TestVRAMAllocationCPUFallback(unittest.TestCase):
         from egx.intelligence.planner.memory_planner import MemoryPlanner
         from egx.core.enums import TrainingMode
         from tests.mocks.mock_gpu import make_gpu
+
         budget = MemoryPlanner().compute_budget(make_gpu(vram_gb=8), TrainingMode.QLORA)
         self.assertGreater(budget["usable_vram"], 0)
         self.assertLess(budget["usable_vram"], 8 * 1024**3)

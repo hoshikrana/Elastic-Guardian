@@ -16,18 +16,16 @@ from egx.api.trainer import EGX
 from egx.intelligence.strategy.selector import FibonacciHeap
 from egx.orchestration.pressure.monitor import PressureEventSkipList
 from egx.intelligence.estimator.dryrun import MemorySegmentTree
-from egx.core.exceptions import (
-    OutOfMemoryError, NaNLossError
-)
+from egx.core.exceptions import OutOfMemoryError, NaNLossError
 from egx.core.enums import RecoveryAction
-
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(name)s | %(message)s")
 logger = logging.getLogger("egx.stress")
 
+
 class TestEGXV1Stress(unittest.TestCase):
-    
+
     def setUp(self):
         self.egx = EGX()
         logger.info("--- Starting v1.0 Definitive Stress Test ---")
@@ -39,7 +37,7 @@ class TestEGXV1Stress(unittest.TestCase):
         for i in range(1000):
             fib.insert(random.random(), f"strat_{i}")
         self.assertEqual(fib.total_nodes, 1000)
-        
+
         logger.info("Action: Stress testing Skip List (Pressure Log)...")
         skip = PressureEventSkipList()
         for i in range(1000):
@@ -49,11 +47,11 @@ class TestEGXV1Stress(unittest.TestCase):
     def test_resilience_exception_handling(self):
         """Verifies Typed Exception Hierarchy and suggested actions."""
         logger.info("Action: Verifying Exception recovery contracts...")
-        
+
         oom = OutOfMemoryError()
         self.assertTrue(oom.recoverable)
         self.assertEqual(oom.suggested_action, RecoveryAction.HALVE_BATCH)
-        
+
         nan = NaNLossError(step=100)
         self.assertTrue(nan.recoverable)
         self.assertEqual(nan.suggested_action, RecoveryAction.RELOAD_CHECKPOINT)
@@ -64,29 +62,40 @@ class TestEGXV1Stress(unittest.TestCase):
         st = MemorySegmentTree(size=1024)
         for i in range(1024):
             st.update(i, i * 1024)
-            
+
         self.assertEqual(st.query_max(0, 512), 511 * 1024)
         self.assertEqual(st.global_peak(), 1023 * 1024)
 
     def test_boot_sequence(self):
         """10-Phase Lifecycle Simulation."""
         logger.info("Action: Verifying Zero-Config Boot sequence...")
-        
+
         # Define a mock model with minimal requirements
         import torch
+
         class MockModel:
             def __init__(self):
                 self.p = torch.nn.Parameter(torch.randn(1))
-            def parameters(self): return [self.p]
-            def named_parameters(self): return [("p", self.p)]
-            def named_modules(self): return [("", self)]
+
+            def parameters(self):
+                return [self.p]
+
+            def named_parameters(self):
+                return [("p", self.p)]
+
+            def named_modules(self):
+                return [("", self)]
+
             def __call__(self, **kwargs):
-                class Out: 
-                    def __init__(self, p): self.loss = p.sum()
+                class Out:
+                    def __init__(self, p):
+                        self.loss = p.sum()
+
                 return Out(self.p)
-                
+
         self.egx.train(model=MockModel(), dataset=[])
         logger.info("  [✔] Boot sequence and training run successfully.")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,13 +1,20 @@
 """
 EGX Test: core/exceptions.py
 """
+
 import unittest
 from egx.core.exceptions import (
-    EGXError, HardwareError, GPUNotFoundError,
-    EGXMemoryError, BoolAsIntError, OutOfMemoryError,
-    NaNLossError, CircularDependencyError,
+    EGXError,
+    HardwareError,
+    GPUNotFoundError,
+    EGXMemoryError,
+    BoolAsIntError,
+    OutOfMemoryError,
+    NaNLossError,
+    CircularDependencyError,
 )
 from egx.core.enums import RecoveryAction
+
 
 class TestCoreExceptions(unittest.TestCase):
     def test_exception_hierarchy(self):
@@ -19,7 +26,7 @@ class TestCoreExceptions(unittest.TestCase):
         oom = OutOfMemoryError()
         self.assertTrue(oom.recoverable)
         self.assertEqual(oom.suggested_action, RecoveryAction.HALVE_BATCH)
-        
+
         gpu_err = GPUNotFoundError()
         self.assertFalse(gpu_err.recoverable)
 
@@ -30,6 +37,7 @@ class TestCoreExceptions(unittest.TestCase):
     def test_circular_dependency(self):
         err = CircularDependencyError(cycle=["A", "B", "A"])
         self.assertIn("A", str(err))
+
 
 if __name__ == "__main__":
     unittest.main()

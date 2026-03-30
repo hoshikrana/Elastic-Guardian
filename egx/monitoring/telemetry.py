@@ -41,7 +41,7 @@ class TelemetryService:
         with self._lock:
             self._ensure_dir()
             payload = {"step": step, "timestamp": time.time(), **metrics}
- 
+
             # 1. Write to local storage
             with open(self.history_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(payload) + "\n")
@@ -52,5 +52,7 @@ class TelemetryService:
             tps = metrics.get("tokens_per_sec", 0.0)
             logger.info(
                 "EGX Step %d: Loss=%.4f | Throughput=%.1f tokens/s",
-                step, loss, tps,
+                step,
+                loss,
+                tps,
             )

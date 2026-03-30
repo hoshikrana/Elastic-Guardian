@@ -26,6 +26,7 @@ logger = logging.getLogger("egx.api.callbacks")
 #  Context Types for Callbacks
 # ──────────────────────────────────────────────────────────────────────
 
+
 class EpochEndContext(TypedDict, total=False):
     metrics: Dict[str, float]
 
@@ -49,6 +50,7 @@ class LogContext(TypedDict, total=False):
 #  Base Callback
 # ──────────────────────────────────────────────────────────────────────
 
+
 class TrainingCallback:
     """
     Base class for EGX training callbacks.
@@ -66,21 +68,38 @@ class TrainingCallback:
     def on_train_begin(self, trainer: "EGXTrainer", **kwargs) -> None:
         """Called before the first training step."""
 
-    def on_train_end(self, trainer: "EGXTrainer", result: Dict[str, Any], **kwargs: ResultContext) -> None:
+    def on_train_end(
+        self, trainer: "EGXTrainer", result: Dict[str, Any], **kwargs: ResultContext
+    ) -> None:
         """Called after all training is complete."""
 
     # ── Epoch lifecycle ──
     def on_epoch_begin(self, trainer: "EGXTrainer", epoch: int, **kwargs) -> None:
         """Called at the start of each epoch."""
 
-    def on_epoch_end(self, trainer: "EGXTrainer", epoch: int, metrics: Dict[str, float], **kwargs: EpochEndContext) -> None:
+    def on_epoch_end(
+        self,
+        trainer: "EGXTrainer",
+        epoch: int,
+        metrics: Dict[str, float],
+        **kwargs: EpochEndContext,
+    ) -> None:
         """Called at the end of each epoch with aggregated metrics."""
 
     # ── Step lifecycle ──
-    def on_step_begin(self, trainer: "EGXTrainer", step: int, **kwargs: StepContext) -> None:
+    def on_step_begin(
+        self, trainer: "EGXTrainer", step: int, **kwargs: StepContext
+    ) -> None:
         """Called before each training step (forward + backward)."""
 
-    def on_step_end(self, trainer: "EGXTrainer", step: int, loss: float, lr: float, **kwargs: StepContext) -> None:
+    def on_step_end(
+        self,
+        trainer: "EGXTrainer",
+        step: int,
+        loss: float,
+        lr: float,
+        **kwargs: StepContext,
+    ) -> None:
         """Called after each training step with loss and current lr."""
 
     # ── Gradient hooks ──
@@ -97,7 +116,9 @@ class TrainingCallback:
     def on_evaluate_begin(self, trainer: "EGXTrainer", **kwargs) -> None:
         """Called before the evaluation loop."""
 
-    def on_evaluate_end(self, trainer: "EGXTrainer", metrics: Dict[str, float], **kwargs) -> None:
+    def on_evaluate_end(
+        self, trainer: "EGXTrainer", metrics: Dict[str, float], **kwargs
+    ) -> None:
         """Called after evaluation with computed metrics."""
 
     # ── Prediction ──
@@ -115,7 +136,9 @@ class TrainingCallback:
         """Called when a checkpoint is loaded."""
 
     # ── Logging ──
-    def on_log(self, trainer: "EGXTrainer", logs: Dict[str, Any], **kwargs: LogContext) -> None:
+    def on_log(
+        self, trainer: "EGXTrainer", logs: Dict[str, Any], **kwargs: LogContext
+    ) -> None:
         """Called every logging_steps with aggregated log dict."""
 
 
@@ -139,14 +162,13 @@ class CallbackHandler:
                 try:
                     fn(**kwargs)
                 except Exception as e:
-                    logger.warning(
-                        f"Callback {type(cb).__name__}.{event} raised: {e}"
-                    )
+                    logger.warning(f"Callback {type(cb).__name__}.{event} raised: {e}")
 
 
 # ──────────────────────────────────────────────────────────────────────
 #  Built-in Callbacks
 # ──────────────────────────────────────────────────────────────────────
+
 
 class EarlyStoppingCallback(TrainingCallback):
     """
@@ -221,7 +243,7 @@ class LoggingCallback(TrainingCallback):
     def on_step_end(self, trainer, step, loss, lr, **kwargs):
         self._step_losses.append(loss)
         if step > 0 and step % self.log_every == 0:
-            avg_loss = sum(self._step_losses[-self.log_every:]) / min(
+            avg_loss = sum(self._step_losses[-self.log_every :]) / min(
                 len(self._step_losses), self.log_every
             )
             elapsed = time.time() - self._epoch_start
@@ -259,7 +281,8 @@ class GradientClipCallback(TrainingCallback):
     def on_after_backward(self, trainer, **kwargs):
         try:
             import torch
-            if hasattr(trainer, '_model') and trainer._model is not None:
+
+            if hasattr(trainer, "_model") and trainer._model is not None:
                 torch.nn.utils.clip_grad_norm_(
                     trainer._model.parameters(), self.max_norm
                 )
@@ -281,9 +304,7 @@ class NaNDetectionCallback(TrainingCallback):
     def on_step_end(self, trainer, step, loss, **kwargs):
         if math.isnan(loss) or math.isinf(loss):
             self.nan_count += 1
-            logger.warning(
-                f"NaN/Inf loss at step {step} (count: {self.nan_count})"
-            )
+            logger.warning(f"NaN/Inf loss at step {step} (count: {self.nan_count})")
             if self.halt_on_nan or self.nan_count >= self.max_nan_count:
                 raise RuntimeError(
                     f"Training halted: {self.nan_count} NaN/Inf losses detected."
@@ -317,7 +338,9 @@ class ThroughputCallback(TrainingCallback):
         if step > 0 and step % self.log_every == 0:
             elapsed = time.time() - self._start
             tps = self.total_tokens / elapsed if elapsed > 0 else 0
-            logger.info(f"Throughput ▶ {tps:,.0f} tokens/sec (total: {self.total_tokens:,})")
+            logger.info(
+                f"Throughput ▶ {tps:,.0f} tokens/sec (total: {self.total_tokens:,})"
+            )
 
 
 class CheckpointCallback(TrainingCallback):
@@ -355,7 +378,8 @@ class CheckpointCallback(TrainingCallback):
             self._save(trainer, f"{trainer.config.output_dir}/best_model")
         else:
             improved = (
-                current > self.best_metric if self.greater_is_better
+                current > self.best_metric
+                if self.greater_is_better
                 else current < self.best_metric
             )
             if improved:
@@ -366,10 +390,12 @@ class CheckpointCallback(TrainingCallback):
     @staticmethod
     def _save(trainer, path: str):
         import os
+
         os.makedirs(path, exist_ok=True)
         try:
             import torch
-            if hasattr(trainer, '_model') and trainer._model is not None:
+
+            if hasattr(trainer, "_model") and trainer._model is not None:
                 torch.save(trainer._model.state_dict(), f"{path}/model.pt")
                 logger.info(f"Checkpoint saved → {path}")
         except Exception as e:

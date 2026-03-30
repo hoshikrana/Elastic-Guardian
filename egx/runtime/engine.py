@@ -87,31 +87,38 @@ class EGXEngine(BaseEngine):
             return
 
         logger.info("EGX Engine booting...")
-        
+
         # 1. Hardware Probing (RAII Context Manager)
         with self.gpu_prober as prober:
             gpus = prober.probe()
-        
+
         # 2. Topology Assembly
         topology = self.topology_builder.build(gpus)
         if topology is None:
             from egx.core.exceptions import HardwareError
-            raise HardwareError("Topology assembly failed: No valid configuration found.", recoverable=False)
+
+            raise HardwareError(
+                "Topology assembly failed: No valid configuration found.",
+                recoverable=False,
+            )
         self._topology = topology
         logger.debug("Topology detected: %d GPUs", len(self._topology.gpus))
 
         # 3. Config Validation
         if config.gradient_accumulation_steps < 1:
             raise ValueError("gradient_accumulation_steps must be >= 1")
-            
+
         # 4. Model Safety Check
         if not ModelValidator.check_nans(model):
-            raise HardwareError("Model contains NaN/Inf weights before training starts.", recoverable=False)
-            
+            raise HardwareError(
+                "Model contains NaN/Inf weights before training starts.",
+                recoverable=False,
+            )
+
         # 5. Model Introspection
         param_count = sum(p.numel() for p in model.parameters())
         logger.debug("Model Introspection: %d parameters", param_count)
-            
+
         self._booted = True
         logger.info("EGX Engine boot successful.")
 
@@ -119,7 +126,7 @@ class EGXEngine(BaseEngine):
     def _normalize_training_mode(mode: Union[str, TrainingMode]) -> TrainingMode:
         """
         Normalize training mode to TrainingMode enum.
-        
+
         Handles both string and enum inputs, always returns TrainingMode enum.
         This eliminates runtime type ambiguity and polymorphic dispatch.
         """
@@ -129,10 +136,14 @@ class EGXEngine(BaseEngine):
             try:
                 return TrainingMode(mode)
             except ValueError as e:
-                logger.warning(f"Invalid training mode '{mode}', defaulting to LORA: {e}")
+                logger.warning(
+                    f"Invalid training mode '{mode}', defaulting to LORA: {e}"
+                )
                 return TrainingMode.LORA
         # Fallback for any other unexpected type
-        logger.warning(f"Unexpected training mode type {type(mode)}, defaulting to LORA")
+        logger.warning(
+            f"Unexpected training mode type {type(mode)}, defaulting to LORA"
+        )
         return TrainingMode.LORA
 
     def run_training(
@@ -163,31 +174,42 @@ class EGXEngine(BaseEngine):
         # Use StrategyScorer to dynamically pick the best mode
         from egx.intelligence.strategy.scorer import StrategyScorer
         from egx.core.constants import STRATEGY_PRIORITY_ORDER
+
         scorer = StrategyScorer()
-        
+
         # Estimate model size (heuristic)
         model_bytes = sum(p.numel() * 4 for p in model.parameters())
         gpu = self._topology.gpus[0] if self._topology and self._topology.gpus else None
-        
+
         if gpu:
-            scored_strategies = scorer.score_all(gpu, model_bytes, STRATEGY_PRIORITY_ORDER)
-            # Find the best strategy that fits. 
+            scored_strategies = scorer.score_all(
+                gpu, model_bytes, STRATEGY_PRIORITY_ORDER
+            )
+            # Find the best strategy that fits.
             best = next((s for s in scored_strategies if s.fits), None)
-            
+
             if best:
                 selected_mode = self._normalize_training_mode(best.mode)
-                logger.info(f"Phase 5: Strategy Selected -> {selected_mode.value} (Score: {best.score:.2f})")
+                logger.info(
+                    f"Phase 5: Strategy Selected -> {selected_mode.value} (Score: {best.score:.2f})"
+                )
                 from egx.infrastructure.structured_logger import StructuredLogger
-                StructuredLogger("egx.engine").log_decision("train_run", {
-                    "mode": selected_mode.value, "score": best.score, "gpu": gpu.name
-                })
+
+                StructuredLogger("egx.engine").log_decision(
+                    "train_run",
+                    {"mode": selected_mode.value, "score": best.score, "gpu": gpu.name},
+                )
             else:
                 selected_mode = TrainingMode.LORA  # Already normalized (it's an enum)
-                logger.warning(f"Phase 5: No strategy fits perfectly. Falling back to {selected_mode.value}")
+                logger.warning(
+                    f"Phase 5: No strategy fits perfectly. Falling back to {selected_mode.value}"
+                )
         else:
             selected_mode_raw = getattr(config, "training_mode", TrainingMode.LORA)
             selected_mode = self._normalize_training_mode(selected_mode_raw)
-            logger.info(f"Phase 5: No GPU info. Defaulting strategy -> {selected_mode.value}")
+            logger.info(
+                f"Phase 5: No GPU info. Defaulting strategy -> {selected_mode.value}"
+            )
 
         # ── Phase 6: Contract Finalization ──
 
@@ -195,14 +217,18 @@ class EGXEngine(BaseEngine):
         # Normalize: selected_mode is now guaranteed to be TrainingMode enum
         if selected_mode.uses_peft():
             model = inject_lora(
-                model, 
-                rank=session_config.lora_rank, 
-                alpha=session_config.lora_alpha, 
-                targets=session_config.lora_targets
+                model,
+                rank=session_config.lora_rank,
+                alpha=session_config.lora_alpha,
+                targets=session_config.lora_targets,
             )
-            logger.info(f"Phase 7: PEFT Injection -> LoRA applied (rank={session_config.lora_rank})")
+            logger.info(
+                f"Phase 7: PEFT Injection -> LoRA applied (rank={session_config.lora_rank})"
+            )
         else:
-            logger.info("Phase 7: PEFT Injection -> Skipped (Not required for selected strategy)")
+            logger.info(
+                "Phase 7: PEFT Injection -> Skipped (Not required for selected strategy)"
+            )
 
         # ── Phase 8: Kernel Setup ──
         # Grad Accumulation Setup
@@ -261,7 +287,7 @@ class EGXEngine(BaseEngine):
     def _setup_training_session_config(self, config: any) -> TrainingSessionConfig:
         """
         Extract and validate runtime training config from EGXConfig.
-        
+
         This consolidates all config defaults into a single, type-safe dataclass
         (eliminates scattered getattr() calls throughout the codebase).
         """
@@ -270,8 +296,8 @@ class EGXEngine(BaseEngine):
         return TrainingSessionConfig.from_egx_config(config)
 
     def _prepare_training_dataloaders(
-        self, 
-        dataset: Any, 
+        self,
+        dataset: Any,
         eval_dataset: Optional[Any],
         session_config: TrainingSessionConfig,
         data_collator: Optional[Callable],
@@ -279,13 +305,13 @@ class EGXEngine(BaseEngine):
     ) -> tuple[Any, Optional[Any]]:
         """
         Prepare training and evaluation dataloaders for accelerate.
-        
+
         Returns: (train_loader, eval_loader)
         """
         dataset_len = len(dataset) if hasattr(dataset, "__len__") else 1
         loader_kwargs = {
             "batch_size": session_config.batch_size,
-            "shuffle": dataset_len > 0
+            "shuffle": dataset_len > 0,
         }
         if data_collator:
             loader_kwargs["collate_fn"] = data_collator
@@ -312,17 +338,22 @@ class EGXEngine(BaseEngine):
             components.append(self._kernel.scheduler)
 
         prepared = accelerator.prepare(*components)
-        
+
         idx = 0
-        self._kernel.model = prepared[idx]; idx += 1
-        train_loader = prepared[idx]; idx += 1
+        self._kernel.model = prepared[idx]
+        idx += 1
+        train_loader = prepared[idx]
+        idx += 1
         if self._kernel.optimizer:
-            self._kernel.optimizer = prepared[idx]; idx += 1
+            self._kernel.optimizer = prepared[idx]
+            idx += 1
         if eval_loader:
-            eval_loader = prepared[idx]; idx += 1
+            eval_loader = prepared[idx]
+            idx += 1
         if self._kernel.scheduler:
-            self._kernel.scheduler = prepared[idx]; idx += 1
-        
+            self._kernel.scheduler = prepared[idx]
+            idx += 1
+
         return train_loader, eval_loader
 
     def _run_training_step(
@@ -337,7 +368,7 @@ class EGXEngine(BaseEngine):
     ) -> Optional[float]:
         """
         Execute single training step with recovery FSM.
-        
+
         Returns: loss_value or None if recovery attempted
         """
         try:
@@ -346,34 +377,39 @@ class EGXEngine(BaseEngine):
             else:
                 with accelerator.accumulate(self._kernel.model):
                     loss_value = self._kernel.train_step(
-                        batch, 
-                        global_step, 
-                        accelerator=accelerator
+                        batch, global_step, accelerator=accelerator
                     )
             return loss_value
         except Exception as e:
             # ── Recovery FSM ──
             from egx.core.exceptions import EGXError
-            from egx.resilience.recovery.orchestrator import RecoveryOrchestrator, RecoveryContext
+            from egx.resilience.recovery.orchestrator import (
+                RecoveryOrchestrator,
+                RecoveryContext,
+            )
             import asyncio
-            
-            logger.error(f"Training error at step {global_step}. Triggering Recovery FSM...")
-            egx_error = e if isinstance(e, EGXError) else EGXError(str(e), recoverable=True)
-            
+
+            logger.error(
+                f"Training error at step {global_step}. Triggering Recovery FSM..."
+            )
+            egx_error = (
+                e if isinstance(e, EGXError) else EGXError(str(e), recoverable=True)
+            )
+
             context = RecoveryContext(
                 error=egx_error,
                 step=global_step,
                 current_batch_size=session_config.batch_size,
-                current_training_mode=str(getattr(self, '_training_mode', 'unknown'))
+                current_training_mode=str(getattr(self, "_training_mode", "unknown")),
             )
-            
+
             orchestrator = RecoveryOrchestrator()
             recovered = asyncio.run(orchestrator.recover(context))
-            
+
             if not recovered:
                 logger.critical("Recovery strategies exhausted. Aborting.")
                 raise e
-                
+
             logger.info("Recovery successful. Resuming training.")
             return None
 
@@ -391,7 +427,7 @@ class EGXEngine(BaseEngine):
     ) -> tuple[float, int, float]:
         """
         Run single training epoch.
-        
+
         Returns: (epoch_loss, epoch_steps, best_eval_loss)
         """
         self._kernel.model.train()
@@ -408,14 +444,21 @@ class EGXEngine(BaseEngine):
 
         for batch_idx, batch in enumerate(train_loader):
             if callback_handler:
-                callback_handler.fire("on_step_begin", trainer=trainer_ref, step=global_step)
+                callback_handler.fire(
+                    "on_step_begin", trainer=trainer_ref, step=global_step
+                )
 
             # Training step
             loss_value = self._run_training_step(
-                batch, global_step, session_config, accelerator,
-                training_step_fn, callback_handler, trainer_ref
+                batch,
+                global_step,
+                session_config,
+                accelerator,
+                training_step_fn,
+                callback_handler,
+                trainer_ref,
             )
-            
+
             if loss_value is None:
                 # Recovery occurred, skip this step
                 continue
@@ -441,10 +484,17 @@ class EGXEngine(BaseEngine):
             # Periodic logging
             if global_step % session_config.logging_steps == 0:
                 avg_recent = accumulated_loss / max(accumulated_count, 1)
-                current_lr = self._kernel.optimizer.param_groups[0]["lr"] if self._kernel.optimizer else 0.0
+                current_lr = (
+                    self._kernel.optimizer.param_groups[0]["lr"]
+                    if self._kernel.optimizer
+                    else 0.0
+                )
                 logger.info(
                     "Epoch %d | Step %d | Loss: %.4f | LR: %.2e",
-                    epoch + 1, global_step, avg_recent, current_lr,
+                    epoch + 1,
+                    global_step,
+                    avg_recent,
+                    current_lr,
                 )
                 if callback_handler:
                     callback_handler.fire(
@@ -469,8 +519,12 @@ class EGXEngine(BaseEngine):
                 and accelerator.sync_gradients
             ):
                 eval_metrics = self._run_evaluation(
-                    self._kernel.model, eval_loader, self.device, 
-                    callback_handler, compute_metrics_fn, trainer_ref,
+                    self._kernel.model,
+                    eval_loader,
+                    self.device,
+                    callback_handler,
+                    compute_metrics_fn,
+                    trainer_ref,
                 )
                 if eval_metrics.get("eval_loss", float("inf")) < best_eval_loss:
                     best_eval_loss = eval_metrics["eval_loss"]
@@ -500,15 +554,19 @@ class EGXEngine(BaseEngine):
     ) -> float:
         """
         Post-epoch evaluation and checkpointing.
-        
+
         Returns: updated best_eval_loss
         """
         epoch_metrics = {"train_loss_epoch": avg_epoch_loss, "epoch": epoch + 1}
 
         if session_config.eval_strategy == "epoch" and eval_loader is not None:
             eval_metrics = self._run_evaluation(
-                self._kernel.model, eval_loader, self.device,
-                callback_handler, compute_metrics_fn, trainer_ref,
+                self._kernel.model,
+                eval_loader,
+                self.device,
+                callback_handler,
+                compute_metrics_fn,
+                trainer_ref,
             )
             epoch_metrics.update(eval_metrics)
             if eval_metrics.get("eval_loss", float("inf")) < best_eval_loss:
@@ -547,7 +605,7 @@ class EGXEngine(BaseEngine):
     ) -> Dict[str, Any]:
         """
         Production training loop orchestrator.
-        
+
         Implements patterns from Megatron-LM, DeepSpeed, and GPT training:
         1. Gradient accumulation
         2. Mixed precision
@@ -555,18 +613,24 @@ class EGXEngine(BaseEngine):
         4. Early stopping
         5. Checkpoint management
         6. Error recovery
-        
+
         REFACTORED for maintainability: Complex logic extracted to dedicated methods
         (_run_training_epoch, _run_training_step, _maybe_evaluate_and_checkpoint).
         """
         if torch is None:
-            return {"success": True, "final_loss": 0.0, "duration_s": 0.0, "mode": selected_mode}
+            return {
+                "success": True,
+                "final_loss": 0.0,
+                "duration_s": 0.0,
+                "mode": selected_mode,
+            }
 
         start_time = time.perf_counter()
         session_config = config
-        
+
         # Initialize accelerator
         from accelerate import Accelerator
+
         accelerator = Accelerator(
             gradient_accumulation_steps=session_config.gradient_accumulation_steps
         )
@@ -593,9 +657,15 @@ class EGXEngine(BaseEngine):
         for epoch in range(session_config.num_epochs):
             # Run training for this epoch
             avg_epoch_loss, epoch_steps, best_eval_loss = self._run_training_epoch(
-                epoch, train_loader, session_config, accelerator,
-                training_step_fn, compute_metrics_fn, eval_loader,
-                callback_handler, trainer_ref
+                epoch,
+                train_loader,
+                session_config,
+                accelerator,
+                training_step_fn,
+                compute_metrics_fn,
+                eval_loader,
+                callback_handler,
+                trainer_ref,
             )
 
             total_loss += avg_epoch_loss * epoch_steps
@@ -603,9 +673,14 @@ class EGXEngine(BaseEngine):
 
             # Post-epoch evaluation and checkpointing
             best_eval_loss = self._maybe_evaluate_and_checkpoint(
-                epoch, avg_epoch_loss, best_eval_loss,
-                session_config, eval_loader, compute_metrics_fn,
-                callback_handler, trainer_ref
+                epoch,
+                avg_epoch_loss,
+                best_eval_loss,
+                session_config,
+                eval_loader,
+                compute_metrics_fn,
+                callback_handler,
+                trainer_ref,
             )
 
             # Check early stopping
@@ -620,7 +695,9 @@ class EGXEngine(BaseEngine):
 
         # ── Final result ──
         duration = time.perf_counter() - start_time
-        final_loss = total_loss / max(total_valid_steps, 1) if total_valid_steps > 0 else 0.0
+        final_loss = (
+            total_loss / max(total_valid_steps, 1) if total_valid_steps > 0 else 0.0
+        )
 
         result = {
             "success": True,
@@ -714,6 +791,7 @@ class EGXEngine(BaseEngine):
     def _check_early_stopping(callback_handler) -> bool:
         """Check if any EarlyStopping callback wants to stop."""
         from egx.api.callbacks import EarlyStoppingCallback
+
         for cb in callback_handler.callbacks:
             if isinstance(cb, EarlyStoppingCallback) and cb.should_stop:
                 return True

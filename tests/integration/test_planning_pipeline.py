@@ -1,4 +1,5 @@
 """Integration: GPU probe → topology → strategy selection → plan."""
+
 import unittest
 
 
@@ -28,10 +29,12 @@ class TestPlanningPipeline(unittest.TestCase):
         from egx.intelligence.strategy.scorer import StrategyScorer
         from egx.core.enums import TrainingMode
         from tests.mocks.mock_gpu import make_gpu
+
         gpu = make_gpu(vram_gb=8)
         results = StrategyScorer().score_all(
-            gpu, model_bytes=4 * 1024**3,
-            modes=[TrainingMode.FULL_FINETUNE, TrainingMode.LORA, TrainingMode.QLORA]
+            gpu,
+            model_bytes=4 * 1024**3,
+            modes=[TrainingMode.FULL_FINETUNE, TrainingMode.LORA, TrainingMode.QLORA],
         )
         self.assertEqual(len(results), 3)
         self.assertTrue(results[0].score >= results[-1].score)
@@ -40,7 +43,10 @@ class TestPlanningPipeline(unittest.TestCase):
         from egx.intelligence.planner.memory_planner import MemoryPlanner
         from egx.core.enums import TrainingMode
         from tests.mocks.mock_gpu import make_gpu
-        budget = MemoryPlanner().compute_budget(make_gpu(vram_gb=16), TrainingMode.QLORA)
+
+        budget = MemoryPlanner().compute_budget(
+            make_gpu(vram_gb=16), TrainingMode.QLORA
+        )
         self.assertGreater(budget["usable_vram"], 0)
 
 

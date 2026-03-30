@@ -34,6 +34,7 @@ logger = logging.getLogger("custom_loop")
 #  1. Define your model (any PyTorch model works)
 # ──────────────────────────────────────────────────────────────────────
 
+
 class MyTransformerModel(nn.Module):
     """A simple transformer-like model for demonstration."""
 
@@ -67,17 +68,20 @@ class MyTransformerModel(nn.Module):
 #  2. Custom Training Step — FULL USER CONTROL
 # ──────────────────────────────────────────────────────────────────────
 
-def my_custom_training_step(model: nn.Module, batch: Dict[str, Any], step: int) -> float:
+
+def my_custom_training_step(
+    model: nn.Module, batch: Dict[str, Any], step: int
+) -> float:
     """
     A completely user-defined training step.
-    
+
     You control:
     - How the forward pass works
     - How the loss is computed
     - How gradients flow
     - What optimizations to apply
     - What to log
-    
+
     EGX will call this instead of its built-in kernel.
     """
     # Get the optimizer (we'll store it as a model attribute for this demo)
@@ -114,6 +118,7 @@ def my_custom_training_step(model: nn.Module, batch: Dict[str, Any], step: int) 
 #  3. Custom Callbacks — Hook into ANY lifecycle event
 # ──────────────────────────────────────────────────────────────────────
 
+
 class LossPlateauDetector(TrainingCallback):
     """Custom callback: detect when loss plateaus and log a warning."""
 
@@ -125,8 +130,8 @@ class LossPlateauDetector(TrainingCallback):
     def on_step_end(self, trainer, step, loss, **kwargs):
         self.losses.append(loss)
         if len(self.losses) >= self.window * 2:
-            recent = sum(self.losses[-self.window:]) / self.window
-            previous = sum(self.losses[-2 * self.window:-self.window]) / self.window
+            recent = sum(self.losses[-self.window :]) / self.window
+            previous = sum(self.losses[-2 * self.window : -self.window]) / self.window
 
             if abs(recent - previous) < self.threshold:
                 logger.warning(
@@ -154,11 +159,11 @@ class GradientStatsCallback(TrainingCallback):
             for p in model.parameters():
                 if p.grad is not None:
                     param_norm = p.grad.data.norm(2).item()
-                    total_norm += param_norm ** 2
+                    total_norm += param_norm**2
                     max_grad = max(max_grad, p.grad.data.abs().max().item())
                     param_count += 1
 
-            total_norm = total_norm ** 0.5
+            total_norm = total_norm**0.5
             logger.info(
                 f"Gradient Stats @ step {step}: "
                 f"norm={total_norm:.4f} | max={max_grad:.6f} | params={param_count}"
@@ -169,10 +174,13 @@ class GradientStatsCallback(TrainingCallback):
 #  4. Custom Metrics — Domain-specific evaluation
 # ──────────────────────────────────────────────────────────────────────
 
-def custom_metrics_fn(predictions: torch.Tensor, labels: torch.Tensor) -> Dict[str, float]:
+
+def custom_metrics_fn(
+    predictions: torch.Tensor, labels: torch.Tensor
+) -> Dict[str, float]:
     """
     Custom metrics function that EGX calls during evaluation.
-    
+
     You receive the raw predictions and labels and can compute
     whatever metrics your use case requires.
     """
@@ -193,6 +201,7 @@ def custom_metrics_fn(predictions: torch.Tensor, labels: torch.Tensor) -> Dict[s
 # ──────────────────────────────────────────────────────────────────────
 #  5. Main — Put it all together
 # ──────────────────────────────────────────────────────────────────────
+
 
 def main():
     logger.info("EGX Custom Training Loop Demo")
@@ -234,13 +243,10 @@ def main():
     # Create trainer with FULL customization
     trainer = EGXTrainer(
         config=config,
-
         # YOUR custom training step — replaces the built-in kernel
         training_step_fn=my_custom_training_step,
-
         # YOUR custom metrics — called during evaluation
         compute_metrics_fn=custom_metrics_fn,
-
         # YOUR custom callbacks — hook into any lifecycle event
         callbacks=[
             LoggingCallback(log_every_n_steps=5),

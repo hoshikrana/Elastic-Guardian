@@ -50,6 +50,7 @@ class EGXEvaluator:
 
     def __repr__(self) -> str:
         return f"EGXEvaluator(batch_size={self.batch_size}, device='{self.device}')"
+
     def evaluate(
         self,
         model: nn.Module,
@@ -115,9 +116,7 @@ class EGXEvaluator:
                             )
                     else:
                         loss = (
-                            outputs.loss
-                            if hasattr(outputs, "loss")
-                            else outputs.sum()
+                            outputs.loss if hasattr(outputs, "loss") else outputs.sum()
                         )
 
                 total_loss += loss.item()
@@ -135,7 +134,11 @@ class EGXEvaluator:
         metrics: Dict[str, float] = {
             "eval_loss": avg_loss,
             "eval_time_s": eval_time,
-            "eval_samples": len(eval_dataset) if hasattr(eval_dataset, "__len__") else total_steps * self.batch_size,
+            "eval_samples": (
+                len(eval_dataset)
+                if hasattr(eval_dataset, "__len__")
+                else total_steps * self.batch_size
+            ),
         }
 
         # Perplexity (exp of loss — standard for language models)
@@ -168,6 +171,7 @@ class EGXEvaluator:
 #  Built-in Metric Functions
 # ──────────────────────────────────────────────────────────────────────
 
+
 def accuracy_metric(predictions: "torch.Tensor", labels: "torch.Tensor") -> float:
     """Top-1 accuracy for classification / next-token prediction."""
     if predictions.dim() > 2:
@@ -188,6 +192,7 @@ def accuracy_metric(predictions: "torch.Tensor", labels: "torch.Tensor") -> floa
 
 def top_k_accuracy_metric(k: int = 5):
     """Factory for top-k accuracy metric."""
+
     def _metric(predictions: "torch.Tensor", labels: "torch.Tensor") -> float:
         if predictions.dim() < 2:
             return 0.0
@@ -198,5 +203,6 @@ def top_k_accuracy_metric(k: int = 5):
         labels_expanded = labels.unsqueeze(-1).expand_as(top_k)
         correct = (top_k[mask] == labels_expanded[mask]).any(dim=-1).float().mean()
         return correct.item()
+
     _metric.__name__ = f"top_{k}_accuracy"
     return _metric

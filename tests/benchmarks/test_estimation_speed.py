@@ -1,4 +1,5 @@
 """Benchmark: Estimator performance regression tests."""
+
 import time
 import unittest
 from tests.mocks.mock_gpu import make_gpu
@@ -7,6 +8,7 @@ from tests.mocks.mock_gpu import make_gpu
 class TestEstimationSpeed(unittest.TestCase):
     def test_hybrid_estimator_under_100ms(self):
         from egx.intelligence.estimator.hybrid import HybridEstimator
+
         gpu = make_gpu(vram_gb=80)
         est = HybridEstimator()
         start = time.perf_counter()
@@ -18,10 +20,13 @@ class TestEstimationSpeed(unittest.TestCase):
         )
         elapsed_ms = (time.perf_counter() - start) * 1000
         self.assertGreater(result, 0)
-        self.assertLess(elapsed_ms, 100, f"Hybrid took {elapsed_ms:.2f}ms, expected < 100ms")
+        self.assertLess(
+            elapsed_ms, 100, f"Hybrid took {elapsed_ms:.2f}ms, expected < 100ms"
+        )
 
     def test_calibration_cache_speed(self):
         from egx.intelligence.estimator.calibration.cache import CalibrationCache
+
         cache = CalibrationCache(max_size=1000)
         start = time.perf_counter()
         for i in range(1000):
@@ -32,7 +37,10 @@ class TestEstimationSpeed(unittest.TestCase):
         self.assertLess(elapsed_ms, 100, f"Cache 1K ops took {elapsed_ms:.2f}ms")
 
     def test_calibration_regression_speed(self):
-        from egx.intelligence.estimator.calibration.regression import CalibrationRegression
+        from egx.intelligence.estimator.calibration.regression import (
+            CalibrationRegression,
+        )
+
         reg = CalibrationRegression()
         start = time.perf_counter()
         for i in range(100):

@@ -1,8 +1,10 @@
 """
 EGX Test: core/enums.py
 """
+
 import unittest
 from egx.core.enums import DeviceType, TrainingMode, DType, HardwareTier, RecoveryAction
+
 
 class TestCoreEnums(unittest.TestCase):
     def test_device_type_values(self):
@@ -25,6 +27,7 @@ class TestCoreEnums(unittest.TestCase):
     def test_recovery_action(self):
         self.assertIn(RecoveryAction.HALVE_BATCH, RecoveryAction)
         self.assertIn(RecoveryAction.RETRY, RecoveryAction)
+
 
 if __name__ == "__main__":
     unittest.main()

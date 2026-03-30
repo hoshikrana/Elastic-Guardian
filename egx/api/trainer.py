@@ -108,13 +108,20 @@ class EGXTrainer:
         self._callback_handler = CallbackHandler(callbacks)
 
         # Auto-add LoggingCallback if not already provided
-        has_logging = any(isinstance(c, LoggingCallback) for c in self._callback_handler.callbacks)
+        has_logging = any(
+            isinstance(c, LoggingCallback) for c in self._callback_handler.callbacks
+        )
         if not has_logging:
-            self._callback_handler.add(LoggingCallback(log_every_n_steps=self.config.logging_steps))
+            self._callback_handler.add(
+                LoggingCallback(log_every_n_steps=self.config.logging_steps)
+            )
 
         # Auto-add EarlyStoppingCallback if patience > 0
         if self.config.early_stopping_patience > 0:
-            has_es = any(isinstance(c, EarlyStoppingCallback) for c in self._callback_handler.callbacks)
+            has_es = any(
+                isinstance(c, EarlyStoppingCallback)
+                for c in self._callback_handler.callbacks
+            )
             if not has_es:
                 self._callback_handler.add(
                     EarlyStoppingCallback(

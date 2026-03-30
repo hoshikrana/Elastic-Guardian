@@ -42,10 +42,12 @@ logger = logging.getLogger(__name__)
 # Fixtures: Large Model Profiles
 # ============================================================================
 
+
 @pytest.fixture
 def gpu_topology_a100_40gb():
     """A100 40GB GPU topology (typical data center setup)."""
     from egx.core.models import GPUSpec
+
     spec = GPUSpec(
         device_id=0,
         name="A100-40GB",
@@ -77,6 +79,7 @@ def gpu_topology_a100_40gb():
 def gpu_topology_h100_80gb():
     """H100 80GB GPU topology (premium setup)."""
     from egx.core.models import GPUSpec
+
     spec = GPUSpec(
         device_id=0,
         name="H100-80GB",
@@ -189,6 +192,7 @@ def training_plan_full_ft_7b():
 # Tests: Memory Estimation Accuracy
 # ============================================================================
 
+
 class TestMemoryEstimationAccuracy:
     """Validate memory estimation against real model dimensions."""
 
@@ -206,7 +210,7 @@ class TestMemoryEstimationAccuracy:
         assert report.weights_bytes > 12 * 1024**3  # At least 12GB for 7B weights
         assert report.activations_bytes > 0
         assert report.confidence >= 0.85
-        
+
         # Log the estimate for reference
         logger.info(
             f"LLaMA 7B LoRA memory estimate: {report.total_bytes/1024**3:.2f}GB "
@@ -215,7 +219,11 @@ class TestMemoryEstimationAccuracy:
         )
 
     def test_llama_7b_full_ft_requires_h100(
-        self, gpu_topology_a100_40gb, gpu_topology_h100_80gb, model_llama_7b, training_plan_full_ft_7b
+        self,
+        gpu_topology_a100_40gb,
+        gpu_topology_h100_80gb,
+        model_llama_7b,
+        training_plan_full_ft_7b,
     ):
         """Full finetune requires more memory than LoRA."""
         estimator = ImprovedAnalyticalEstimator()
@@ -243,8 +251,10 @@ class TestMemoryEstimationAccuracy:
             lora_alpha=32,
             optimizer=OptimizerType.ADAMW,
         )
-        report_lora = estimator.estimate(gpu_topology_a100_40gb, model_llama_7b, plan_lora)
-        
+        report_lora = estimator.estimate(
+            gpu_topology_a100_40gb, model_llama_7b, plan_lora
+        )
+
         # Full FT should use significantly more memory than LoRA
         assert report_a100.total_bytes > report_lora.total_bytes
         logger.info(
@@ -252,7 +262,11 @@ class TestMemoryEstimationAccuracy:
         )
 
     def test_llama_13b_lora_vs_7b(
-        self, gpu_topology_a100_40gb, model_llama_7b, model_llama_13b, training_plan_lora_7b
+        self,
+        gpu_topology_a100_40gb,
+        model_llama_7b,
+        model_llama_13b,
+        training_plan_lora_7b,
     ):
         """LLaMA 13B LoRA should use ~1.8x memory of 7B LoRA."""
         estimator = ImprovedAnalyticalEstimator()
@@ -260,7 +274,7 @@ class TestMemoryEstimationAccuracy:
         report_7b = estimator.estimate(
             gpu_topology_a100_40gb, model_llama_7b, training_plan_lora_7b
         )
-        
+
         # Create 13B plan (same as 7B)
         plan_13b = TrainingPlan(
             mode=TrainingMode.LORA,
@@ -277,7 +291,7 @@ class TestMemoryEstimationAccuracy:
             lora_alpha=32,
             optimizer=OptimizerType.ADAMW,
         )
-        
+
         report_13b = estimator.estimate(
             gpu_topology_a100_40gb, model_llama_13b, plan_13b
         )
@@ -288,7 +302,11 @@ class TestMemoryEstimationAccuracy:
         logger.info(f"LLaMA 13B/7B memory ratio: {ratio:.2f}x")
 
     def test_mistral_7b_vs_llama_7b_memory(
-        self, gpu_topology_a100_40gb, model_llama_7b, model_mistral_7b, training_plan_lora_7b
+        self,
+        gpu_topology_a100_40gb,
+        model_llama_7b,
+        model_mistral_7b,
+        training_plan_lora_7b,
     ):
         """Mistral 7B vs LLaMA 7B should have similar memory (similar size)."""
         estimator = ImprovedAnalyticalEstimator()
@@ -296,7 +314,7 @@ class TestMemoryEstimationAccuracy:
         report_llama = estimator.estimate(
             gpu_topology_a100_40gb, model_llama_7b, training_plan_lora_7b
         )
-        
+
         # Mistral plan (same as LLaMA)
         plan_mistral = TrainingPlan(
             mode=TrainingMode.LORA,
@@ -313,14 +331,16 @@ class TestMemoryEstimationAccuracy:
             lora_alpha=32,
             optimizer=OptimizerType.ADAMW,
         )
-        
+
         report_mistral = estimator.estimate(
             gpu_topology_a100_40gb, model_mistral_7b, plan_mistral
         )
 
         # Should be similar (within 20% due to different seq_len)
         ratio = report_mistral.total_bytes / report_llama.total_bytes
-        assert 0.9 < ratio < 1.6  # Allow variance due to different seq_len (4096 vs 2048)
+        assert (
+            0.9 < ratio < 1.6
+        )  # Allow variance due to different seq_len (4096 vs 2048)
         logger.info(f"Mistral/LLaMA memory ratio: {ratio:.2f}x")
 
     @pytest.mark.parametrize("batch_size,grad_accum", [(4, 1), (8, 2), (16, 4)])
@@ -357,6 +377,7 @@ class TestMemoryEstimationAccuracy:
 # ============================================================================
 # Tests: Recovery Orchestrator with Large Models
 # ============================================================================
+
 
 class TestRecoveryWithLargeModels:
     """Validate recovery orchestrator behavior under real memory pressure."""
@@ -432,6 +453,7 @@ class TestRecoveryWithLargeModels:
 # Tests: Checkpoint & Resume with Large Models
 # ============================================================================
 
+
 class TestCheckpointResume:
     """Validate checkpoint save/load functionality."""
 
@@ -453,6 +475,7 @@ class TestCheckpointResume:
 
         # Write metadata
         import json
+
         metadata_file = checkpoint_dir / "metadata.json"
         with open(metadata_file, "w") as f:
             json.dump(metadata, f)
@@ -492,12 +515,14 @@ class TestCheckpointResume:
 # Tests: Multi-Model Stress Testing
 # ============================================================================
 
+
 class TestMultiModelStress:
     """Stress test across multiple model sizes."""
 
     def test_progressive_model_scaling(self, gpu_topology_a100_40gb):
         """Test model sizes: 7B → 13B → verify scaling."""
         from egx.core.models import ModelProfile
+
         estimator = ImprovedAnalyticalEstimator()
 
         models = [
@@ -594,17 +619,17 @@ class TestMultiModelStress:
 # Integration Test: Full Training Simulation
 # ============================================================================
 
+
 class TestFullTrainingSimulation:
     """Simulate a complete training run (memory estimation → training → recovery)."""
 
-    def test_pre_training_capacity_check(
-        self, gpu_topology_a100_40gb, model_llama_7b
-    ):
+    def test_pre_training_capacity_check(self, gpu_topology_a100_40gb, model_llama_7b):
         """Before training: verify model fits and estimate peak memory."""
         estimator = ImprovedAnalyticalEstimator()
 
         # To fit 7B on 40GB, we need to load the base model in FP16
         import dataclasses
+
         model_fp16 = dataclasses.replace(model_llama_7b, dtype=DType.FP16)
 
         # Create an optimized plan to ensure it fits in 40GB
@@ -624,9 +649,7 @@ class TestFullTrainingSimulation:
             optimizer=OptimizerType.ADAMW,
         )
 
-        report = estimator.estimate(
-            gpu_topology_a100_40gb, model_fp16, optimized_plan
-        )
+        report = estimator.estimate(gpu_topology_a100_40gb, model_fp16, optimized_plan)
 
         # Check feasibility
         gpu_memory = gpu_topology_a100_40gb.gpus[0].vram_bytes

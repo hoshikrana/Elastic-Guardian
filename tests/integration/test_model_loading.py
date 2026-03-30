@@ -1,10 +1,12 @@
 """Integration: Registry lookup → model config verification."""
+
 import unittest
 
 
 class TestModelLoading(unittest.TestCase):
     def test_builtin_model_lookup(self):
         from egx.models.registry import ModelRegistry
+
         reg = ModelRegistry()
         cfg = reg.get("llama2-7b")
         self.assertIsNotNone(cfg)
@@ -12,6 +14,7 @@ class TestModelLoading(unittest.TestCase):
 
     def test_list_all_models(self):
         from egx.models.registry import ModelRegistry
+
         reg = ModelRegistry()
         available = reg.list_available()
         self.assertIsInstance(available, list)
@@ -19,6 +22,7 @@ class TestModelLoading(unittest.TestCase):
 
     def test_custom_model_registration(self):
         from egx.models.registry import ModelRegistry, ModelArchConfig
+
         reg = ModelRegistry()
         custom = ModelArchConfig("test-tiny", 512, 4, 4, 2048, 10000, 512, 100_000)
         reg.register(custom)
@@ -27,6 +31,7 @@ class TestModelLoading(unittest.TestCase):
 
     def test_unknown_model_returns_none(self):
         from egx.models.registry import ModelRegistry
+
         reg = ModelRegistry()
         self.assertIsNone(reg.get("nonexistent-model-xyz"))
 

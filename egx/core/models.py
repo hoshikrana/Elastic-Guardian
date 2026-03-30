@@ -43,7 +43,7 @@ class GPUSpec:
 
     @property
     def vram_gb(self) -> float:
-        return self.vram_bytes / (1024 ** 3)
+        return self.vram_bytes / (1024**3)
 
     @property
     def tier(self) -> HardwareTier:

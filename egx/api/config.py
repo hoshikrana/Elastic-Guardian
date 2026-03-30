@@ -54,13 +54,13 @@ class EGXConfig:
 
     # ── Evaluation ──
     eval_batch_size: int = 4
-    eval_strategy: str = "epoch"        # "epoch", "steps", "no"
-    eval_steps: int = 500               # evaluate every N steps (if eval_strategy="steps")
+    eval_strategy: str = "epoch"  # "epoch", "steps", "no"
+    eval_steps: int = 500  # evaluate every N steps (if eval_strategy="steps")
     metric_for_best_model: str = "loss"
     compute_perplexity: bool = True
 
     # ── Early Stopping ──
-    early_stopping_patience: int = 0    # 0 = disabled
+    early_stopping_patience: int = 0  # 0 = disabled
     early_stopping_threshold: float = 0.0
 
     # ── Logging ──
@@ -72,7 +72,7 @@ class EGXConfig:
     checkpoint_strategy: str = "adaptive"
     save_total_limit: int = 3
     save_steps: int = 500
-    timeout: float = 300.0              # Law 4: Defensive defaults (5 min for cold starts)
+    timeout: float = 300.0  # Law 4: Defensive defaults (5 min for cold starts)
 
     # ── Hardware ──
     device: str = "auto"
@@ -89,7 +89,9 @@ class EGXConfig:
         if self.batch_size < 1:
             raise ValueError(f"batch_size must be >= 1, got {self.batch_size}")
         if self.num_epochs < 1 and self.max_steps <= 0:
-            raise ValueError(f"num_epochs must be >= 1 (or set max_steps > 0), got {self.num_epochs}")
+            raise ValueError(
+                f"num_epochs must be >= 1 (or set max_steps > 0), got {self.num_epochs}"
+            )
         if self.learning_rate <= 0:
             raise ValueError(f"learning_rate must be > 0, got {self.learning_rate}")
         if self.max_grad_norm < 0:
@@ -102,6 +104,7 @@ class EGXConfig:
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "EGXConfig":
         import dataclasses
+
         known = {f.name for f in dataclasses.fields(cls)}
         init_args = {k: v for k, v in d.items() if k in known and k != "overrides"}
         extra = {k: v for k, v in d.items() if k not in known}
@@ -120,14 +123,14 @@ class EGXConfig:
 class TrainingSessionConfig:
     """
     Runtime training configuration extracted from EGXConfig.
-    
+
     Consolidates all getattr() calls into a single dataclass for cleaner
     code and single source of truth for defaults.
-    
+
     This eliminates the anti-pattern of scattered getattr(config, "field", default)
     throughout the codebase.
     """
-    
+
     # ── Optimization ──
     batch_size: int
     num_epochs: int
@@ -140,11 +143,11 @@ class TrainingSessionConfig:
     scheduler_type: Optional[str]
     gradient_accumulation_steps: int
     max_grad_norm: float
-    
+
     # ── Loss & Precision ──
     loss_fn: Optional[Union[str, Callable]]
     precision_override: Optional[str]
-    
+
     # ── Evaluation ──
     eval_batch_size: int
     eval_strategy: str
@@ -153,33 +156,33 @@ class TrainingSessionConfig:
     compute_perplexity: bool
     early_stopping_patience: int
     early_stopping_threshold: float
-    
+
     # ── Checkpointing ──
     output_dir: str
     checkpoint_strategy: str
     save_total_limit: int
     save_steps: int
     timeout: float
-    
+
     # ── Logging ──
     logging_steps: int
     log_level: str
-    
+
     # ── PEFT ──
     lora_rank: int
     lora_alpha: int
     lora_dropout: float
     lora_targets: Optional[tuple]
     gradient_checkpointing: bool
-    
+
     # ── Callbacks ──
     callbacks: List[Callable] = field(default_factory=list)
-    
+
     @classmethod
     def from_egx_config(cls, config: EGXConfig) -> "TrainingSessionConfig":
         """
         Extract TrainingSessionConfig from EGXConfig.
-        
+
         This is the single place where all default values and type conversions happen.
         """
         return cls(
@@ -195,11 +198,9 @@ class TrainingSessionConfig:
             scheduler_type=config.scheduler_type,
             gradient_accumulation_steps=config.gradient_accumulation_steps,
             max_grad_norm=config.max_grad_norm,
-            
             # Loss & Precision
             loss_fn=config.loss_fn,
             precision_override=config.precision_override,
-            
             # Evaluation
             eval_batch_size=config.eval_batch_size,
             eval_strategy=config.eval_strategy,
@@ -208,29 +209,25 @@ class TrainingSessionConfig:
             compute_perplexity=config.compute_perplexity,
             early_stopping_patience=config.early_stopping_patience,
             early_stopping_threshold=config.early_stopping_threshold,
-            
             # Checkpointing
             output_dir=config.output_dir,
             checkpoint_strategy=config.checkpoint_strategy,
             save_total_limit=config.save_total_limit,
             save_steps=config.save_steps,
             timeout=config.timeout,
-            
             # Logging
             logging_steps=config.logging_steps,
             log_level=config.log_level,
-            
             # PEFT
             lora_rank=config.lora_rank,
             lora_alpha=config.lora_alpha,
             lora_dropout=config.lora_dropout,
             lora_targets=config.lora_targets,
             gradient_checkpointing=config.gradient_checkpointing,
-            
             # Callbacks
             callbacks=list(config.callbacks),
         )
-    
+
     def __repr__(self) -> str:
         return (
             f"TrainingSessionConfig(batch={self.batch_size}, epochs={self.num_epochs}, "

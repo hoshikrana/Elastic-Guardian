@@ -54,7 +54,11 @@ class HFDatasetAdapter(Dataset):
                       after tensor conversion.
         """
         self.dataset = hf_dataset
-        self.tensor_columns = tensor_columns or ["input_ids", "attention_mask", "labels"]
+        self.tensor_columns = tensor_columns or [
+            "input_ids",
+            "attention_mask",
+            "labels",
+        ]
         self.transform = transform
 
     def __len__(self) -> int:
@@ -96,6 +100,7 @@ class HFDatasetAdapter(Dataset):
             text_column: Name of the column containing text.
             max_length: Maximum sequence length.
         """
+
         def tokenize_fn(batch):
             tokens = tokenizer(
                 batch[text_column],

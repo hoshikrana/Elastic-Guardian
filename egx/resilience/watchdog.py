@@ -73,10 +73,12 @@ class TrainingWatchdog(BaseWatchdog):
             elapsed = time.monotonic() - self._last_heartbeat
             if elapsed > self.timeout_s:
                 logger.error(
-                    "Deadlock detected! No heartbeat for %.1fs.", elapsed,
+                    "Deadlock detected! No heartbeat for %.1fs.",
+                    elapsed,
                 )
                 self._deadlock_error = DeadlockError(
-                    timeout_s=elapsed, last_step=self._last_step,
+                    timeout_s=elapsed,
+                    last_step=self._last_step,
                 )
                 self._deadlock_detected.set()
                 return  # exit the monitoring loop

@@ -9,7 +9,9 @@ class MockMemInfo:
 
 
 class MockNVMLHandle:
-    def __init__(self, idx: int = 0, name: str = "MockGPU", vram_total: int = 8 * 1024**3):
+    def __init__(
+        self, idx: int = 0, name: str = "MockGPU", vram_total: int = 8 * 1024**3
+    ):
         self.idx = idx
         self.name = name
         self.vram_total = vram_total

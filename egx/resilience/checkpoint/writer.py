@@ -31,10 +31,15 @@ class CheckpointWriter:
         try:
             # 1. Save to temporary file
             # If all values are tensors, use safetensors for security
-            can_use_safetensors = all(isinstance(v, torch.Tensor) for v in data.values()) if isinstance(data, dict) else False
-            
+            can_use_safetensors = (
+                all(isinstance(v, torch.Tensor) for v in data.values())
+                if isinstance(data, dict)
+                else False
+            )
+
             if can_use_safetensors:
                 from safetensors.torch import save_file
+
                 save_file(data, tmp_path)
             else:
                 torch.save(data, tmp_path)
@@ -49,8 +54,9 @@ class CheckpointWriter:
                 f.write(sha256)
                 f.flush()
                 import os
+
                 os.fsync(f.fileno())
-            
+
             # 4. Atomic Replace
             os.replace(sidecar_tmp, sidecar_path)
             os.replace(tmp_path, path_obj)

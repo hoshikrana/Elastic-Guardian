@@ -35,7 +35,7 @@ logger = logging.getLogger("egx.training.loss_strategies")
 class LossFunctionStrategy(ABC):
     """
     Abstract base class for loss function strategies.
-    
+
     Each strategy encapsulates a specific loss computation pattern.
     This allows users to extend with custom losses by subclassing.
     """
@@ -44,14 +44,14 @@ class LossFunctionStrategy(ABC):
     def compute(self, outputs: Any, batch: Dict[str, Any]) -> torch.Tensor:
         """
         Compute loss from model outputs and input batch.
-        
+
         Args:
             outputs: Model output (typically from model(**batch))
             batch: Input batch dict (may contain 'labels', 'target', etc.)
-        
+
         Returns:
             torch.Tensor: Scalar loss value
-        
+
         Raises:
             ValueError: If required fields missing or incompatible types
         """
@@ -66,7 +66,7 @@ class LossFunctionStrategy(ABC):
 class CallableLossStrategy(LossFunctionStrategy):
     """
     Strategy for callable loss functions (user-provided functions).
-    
+
     Handles any Python callable that takes (outputs, batch) -> loss.
     Includes fallback if callable expects only outputs.
     """
@@ -109,7 +109,7 @@ class CallableLossStrategy(LossFunctionStrategy):
 class HFModelDefaultLossStrategy(LossFunctionStrategy):
     """
     Strategy for HuggingFace models with built-in loss calculation.
-    
+
     When model is passed (inputs, labels), it returns output.loss.
     This is the default for transformers.PreTrainedModel derivatives.
     """
@@ -137,7 +137,7 @@ class HFModelDefaultLossStrategy(LossFunctionStrategy):
 class MSELossStrategy(LossFunctionStrategy):
     """
     Strategy for Mean Squared Error loss.
-    
+
     Requires 'labels' in batch. Applied as: MSE(outputs, batch['labels'])
     Useful for regression tasks.
     """
@@ -169,7 +169,7 @@ class MSELossStrategy(LossFunctionStrategy):
 class CrossEntropyLossStrategy(LossFunctionStrategy):
     """
     Strategy for Cross-Entropy loss (classification).
-    
+
     Requires 'labels' in batch. Applied as: CE(outputs, batch['labels'])
     Useful for multi-class classification tasks.
     """
@@ -207,7 +207,7 @@ class CrossEntropyLossStrategy(LossFunctionStrategy):
 class BCEWithLogitsLossStrategy(LossFunctionStrategy):
     """
     Strategy for Binary Cross-Entropy with Logits loss.
-    
+
     Requires 'labels' in batch. Applied as: BCE(outputs, batch['labels'])
     Useful for binary classification or multi-label tasks.
     """
@@ -244,7 +244,7 @@ class BCEWithLogitsLossStrategy(LossFunctionStrategy):
 class SumLossStrategy(LossFunctionStrategy):
     """
     Fallback strategy: sum all values in outputs.
-    
+
     Used when loss function is None and model doesn't have outputs.loss.
     This is a last-resort strategy for debugging/prototyping.
     """
@@ -265,9 +265,7 @@ class SumLossStrategy(LossFunctionStrategy):
                     )
                 loss = sum(t.sum() for t in tensors)
         else:
-            raise ValueError(
-                f"Cannot compute sum loss for output type {type(outputs)}"
-            )
+            raise ValueError(f"Cannot compute sum loss for output type {type(outputs)}")
 
         if not isinstance(loss, torch.Tensor):
             raise TypeError(f"Expected torch.Tensor, got {type(loss)}")
@@ -281,13 +279,13 @@ class SumLossStrategy(LossFunctionStrategy):
 class LossFunctionFactory:
     """
     Factory for creating loss function strategies.
-    
+
     Handles:
     - String names ("mse", "cross_entropy", etc.)
     - Callable functions (user-provided)
     - TrainingMode enums with loss specifications
     - None (defaults to HF model loss)
-    
+
     Eliminates string matching from train_step() entirely.
     """
 
@@ -305,21 +303,19 @@ class LossFunctionFactory:
     }
 
     @staticmethod
-    def create(
-        loss_fn: Optional[Union[str, Callable]] = None
-    ) -> LossFunctionStrategy:
+    def create(loss_fn: Optional[Union[str, Callable]] = None) -> LossFunctionStrategy:
         """
         Create a loss strategy from various input types.
-        
+
         Args:
             loss_fn: One of:
                 - None: Use HF model default loss (outputs.loss)
                 - str: Strategy name ("mse", "cross_entropy", etc.)
                 - Callable: User-provided loss function
-        
+
         Returns:
             LossFunctionStrategy: Appropriate strategy instance
-        
+
         Raises:
             ValueError: If strategy name is unknown
             TypeError: If input type is unsupported
@@ -333,8 +329,7 @@ class LossFunctionFactory:
             if loss_name not in LossFunctionFactory._strategy_map:
                 available = ", ".join(LossFunctionFactory._strategy_map.keys())
                 raise ValueError(
-                    f"Unknown loss function: '{loss_fn}'. "
-                    f"Available: {available}"
+                    f"Unknown loss function: '{loss_fn}'. " f"Available: {available}"
                 )
             strategy_class = LossFunctionFactory._strategy_map[loss_name]
             logger.info(f"Creating loss strategy: {strategy_class.__name__}")
@@ -352,9 +347,9 @@ class LossFunctionFactory:
     def register_strategy(name: str, strategy_class: type) -> None:
         """
         Register a custom loss strategy.
-        
+
         Allows users to add new loss types without modifying this file.
-        
+
         Args:
             name: Name to register under (e.g., "custom_huber")
             strategy_class: Subclass of LossFunctionStrategy
@@ -366,7 +361,9 @@ class LossFunctionFactory:
             )
         name_lower = name.lower().strip()
         LossFunctionFactory._strategy_map[name_lower] = strategy_class
-        logger.info(f"Registered loss strategy: {name_lower} -> {strategy_class.__name__}")
+        logger.info(
+            f"Registered loss strategy: {name_lower} -> {strategy_class.__name__}"
+        )
 
     @staticmethod
     def available_strategies() -> Dict[str, type]:

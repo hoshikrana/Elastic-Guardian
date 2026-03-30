@@ -1,4 +1,5 @@
 """Unit tests for RAMToNVMeSwapper."""
+
 import unittest
 import torch
 
@@ -6,6 +7,7 @@ import torch
 class TestRAMToNVMeSwapper(unittest.TestCase):
     def test_offload_and_restore(self):
         from egx.orchestration.swapper.ram_to_nvme import RAMToNVMeSwapper
+
         sw = RAMToNVMeSwapper()
         t = torch.randn(50)
         sw.offload("test_t", t)
@@ -16,6 +18,7 @@ class TestRAMToNVMeSwapper(unittest.TestCase):
 
     def test_cleanup(self):
         from egx.orchestration.swapper.ram_to_nvme import RAMToNVMeSwapper
+
         sw = RAMToNVMeSwapper()
         sw.offload("a", torch.randn(10))
         sw.offload("b", torch.randn(10))
@@ -25,6 +28,7 @@ class TestRAMToNVMeSwapper(unittest.TestCase):
 
     def test_restore_missing_key(self):
         from egx.orchestration.swapper.ram_to_nvme import RAMToNVMeSwapper
+
         sw = RAMToNVMeSwapper()
         with self.assertRaises(KeyError):
             sw.restore("nonexistent")

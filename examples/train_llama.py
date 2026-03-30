@@ -112,6 +112,7 @@ def main():
     logger.info(f"Loading model via EGX Component: {model_id}")
 
     from egx.models.loader import AutoModelLoader
+
     model, tokenizer = AutoModelLoader.from_pretrained(
         pretrained_model_name_or_path=model_id,
         dtype=torch.float16,
@@ -133,23 +134,18 @@ def main():
         gradient_accumulation_steps=8,
         max_grad_norm=1.0,
         gradient_checkpointing=True,
-
         # PEFT
         lora_rank=8,
         lora_alpha=16,
         lora_targets=["q_proj", "v_proj"],
-
         # Evaluation (during training)
         eval_strategy="epoch",
         compute_perplexity=True,
-
         # Logging
         logging_steps=50,
-
         # Early stopping
         early_stopping_patience=2,
         early_stopping_threshold=0.01,
-
         # Checkpointing
         output_dir="./egx_llama_output",
         save_steps=500,

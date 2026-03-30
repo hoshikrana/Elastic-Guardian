@@ -6,17 +6,26 @@ from egx.peft.lora import inject_lora
 # Setup logging to see inject_lora output
 logging.basicConfig(level=logging.INFO)
 
+
 class DummyLlama(nn.Module):
     def __init__(self):
         super().__init__()
-        self.layers = nn.ModuleList([
-            nn.ModuleDict({
-                "self_attn": nn.ModuleDict({
-                    "q_proj": nn.Linear(128, 128),
-                    "v_proj": nn.Linear(128, 128)
-                })
-            }) for _ in range(2)
-        ])
+        self.layers = nn.ModuleList(
+            [
+                nn.ModuleDict(
+                    {
+                        "self_attn": nn.ModuleDict(
+                            {
+                                "q_proj": nn.Linear(128, 128),
+                                "v_proj": nn.Linear(128, 128),
+                            }
+                        )
+                    }
+                )
+                for _ in range(2)
+            ]
+        )
+
 
 model = DummyLlama()
 print("--- Before injection ---")

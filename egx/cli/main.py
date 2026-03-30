@@ -54,9 +54,7 @@ def train(
     )
 
     trainer = EGX()
-    trainer.train(
-        model=target, dataset=[], scratch=scratch, config_path=config
-    )
+    trainer.train(model=target, dataset=[], scratch=scratch, config_path=config)
 
     console.print("[green]✔ Training Complete![/]")
 

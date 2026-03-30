@@ -1,4 +1,5 @@
 """Unit tests for NVMeDataLoader."""
+
 import unittest
 
 
@@ -6,6 +7,7 @@ class TestNVMeDataLoader(unittest.TestCase):
     def test_auto_worker_count(self):
         from egx.data.loader import NVMeDataLoader
         from tests.mocks.mock_dataloader import MockDataset
+
         ds = MockDataset(size=20)
         loader = NVMeDataLoader(ds, batch_size=4)
         self.assertGreaterEqual(loader.num_workers, 0)
@@ -14,6 +16,7 @@ class TestNVMeDataLoader(unittest.TestCase):
         from egx.data.loader import NVMeDataLoader
         from tests.mocks.mock_dataloader import MockDataset
         from tests.mocks.mock_topology import datacenter_topology
+
         ds = MockDataset(size=20)
         topo = datacenter_topology()
         loader = NVMeDataLoader(ds, batch_size=4, topology=topo)
@@ -23,6 +26,7 @@ class TestNVMeDataLoader(unittest.TestCase):
         from egx.data.loader import NVMeDataLoader
         from tests.mocks.mock_dataloader import MockDataset
         from tests.mocks.mock_topology import datacenter_topology
+
         ds = MockDataset(size=20)
         topo = datacenter_topology()
         loader = NVMeDataLoader(ds, batch_size=4, topology=topo)

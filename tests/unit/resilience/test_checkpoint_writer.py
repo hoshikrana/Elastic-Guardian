@@ -1,4 +1,5 @@
 """Unit tests for CheckpointWriter."""
+
 import unittest
 import tempfile
 import os
@@ -8,6 +9,7 @@ import torch
 class TestCheckpointWriter(unittest.TestCase):
     def test_atomic_save(self):
         from egx.resilience.checkpoint.writer import CheckpointWriter
+
         writer = CheckpointWriter()
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "ckpt.pt")
@@ -16,6 +18,7 @@ class TestCheckpointWriter(unittest.TestCase):
 
     def test_sha256_sidecar(self):
         from egx.resilience.checkpoint.writer import CheckpointWriter
+
         writer = CheckpointWriter()
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "ckpt.pt")
@@ -27,6 +30,7 @@ class TestCheckpointWriter(unittest.TestCase):
 
     def test_no_tmp_file_left_on_failure(self):
         from egx.resilience.checkpoint.writer import CheckpointWriter
+
         writer = CheckpointWriter()
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "ckpt.pt")
