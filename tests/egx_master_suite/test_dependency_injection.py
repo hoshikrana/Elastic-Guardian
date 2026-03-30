@@ -7,7 +7,7 @@ and fallbacks operate gracefully without breaking the core mathematical architec
 """
 
 import unittest
-from typing import List, Dict, Any, Optional
+from typing import List, Any
 
 from egx.core.interfaces import (
     BaseGPUProber,

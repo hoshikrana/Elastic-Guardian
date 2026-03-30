@@ -1,7 +1,6 @@
 """Unit tests for DynamicPaddingCollator."""
 
 import unittest
-import torch
 
 
 class TestDynamicPaddingCollator(unittest.TestCase):

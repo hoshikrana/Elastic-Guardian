@@ -1,7 +1,6 @@
 """Deterministic mock batch iterator for EGX test suite."""
 
 import torch
-from typing import Dict, List, Any
 
 
 class MockBatchIterator:

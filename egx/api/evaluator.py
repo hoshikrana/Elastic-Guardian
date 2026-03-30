@@ -11,14 +11,13 @@ from __future__ import annotations
 import logging
 import math
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, Optional
 
 try:
     import torch
     import torch.nn as nn
     from torch.utils.data import DataLoader
     from egx.core.device import get_default_device
-    from egx.monitoring.metrics import MetricRegistry
 except ImportError:
     torch = None
 

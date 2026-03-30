@@ -20,10 +20,8 @@ except ImportError:
 
 from egx.core.enums import RecoveryAction
 from egx.core.exceptions import EGXError, OutOfMemoryError
-from egx.resilience.watchdog import TrainingWatchdog
-from egx.resilience.checkpoint.manager import CheckpointManager
-from egx.core.device import get_default_device, get_device_type
-from egx.training.loss_strategies import LossFunctionFactory, LossFunctionStrategy
+from egx.core.device import get_device_type
+from egx.training.loss_strategies import LossFunctionFactory
 from egx.core.interfaces import (
     BaseTrainingKernel,
     BaseWatchdog,

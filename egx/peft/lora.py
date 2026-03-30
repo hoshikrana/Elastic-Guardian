@@ -12,7 +12,7 @@ from typing import Optional
 import torch
 import torch.nn as nn
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 logger = logging.getLogger("egx.peft.lora")
 

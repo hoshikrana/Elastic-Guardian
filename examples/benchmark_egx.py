@@ -27,7 +27,7 @@ import psutil
 from pathlib import Path
 from datetime import datetime
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -269,7 +269,7 @@ def benchmark_latency() -> Dict:
         "mean_ms": sum(latencies) / len(latencies),
     }
 
-    logger.info(f"\nLatency Percentiles (ms):")
+    logger.info("\nLatency Percentiles (ms):")
     logger.info(f"  P50:  {results['p50_ms']:.2f}")
     logger.info(f"  P99:  {results['p99_ms']:.2f}")
     logger.info(f"  P100: {results['p100_ms']:.2f}")

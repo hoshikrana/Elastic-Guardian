@@ -9,7 +9,6 @@ Run: `python presentation_demo.py`
 """
 
 import logging
-import os
 import sys
 
 # EGX Framework Imports

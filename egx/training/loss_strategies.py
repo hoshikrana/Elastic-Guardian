@@ -321,7 +321,7 @@ class LossFunctionFactory:
             TypeError: If input type is unsupported
         """
         if loss_fn is None:
-            logger.info(f"Loss function not specified, using HF model default loss")
+            logger.info("Loss function not specified, using HF model default loss")
             return HFModelDefaultLossStrategy()
 
         if isinstance(loss_fn, str):

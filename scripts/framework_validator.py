@@ -147,7 +147,7 @@ class FrameworkValidator:
         self.print_header("Pydantic Data Validation Tests")
 
         try:
-            from pydantic import BaseModel, ValidationError, Field
+            from pydantic import BaseModel, ValidationError
 
             class TestModel(BaseModel):
                 name: str

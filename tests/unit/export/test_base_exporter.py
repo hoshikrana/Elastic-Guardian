@@ -26,7 +26,7 @@ class TestBaseExporter(unittest.TestCase):
 
     def test_ensure_dir_creates_parent(self):
         from egx.export.base_exporter import BaseExporter
-        import tempfile, os
+        import tempfile
         from pathlib import Path
 
         class ConcreteExporter(BaseExporter):

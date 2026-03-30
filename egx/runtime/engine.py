@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import math
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 try:
     import torch
@@ -24,11 +24,10 @@ except ImportError:
 
 from egx.core.models import HardwareTopology, TrainingPlan
 from egx.core.enums import TrainingMode
-from egx.core.device import get_default_device, get_device_type
 from egx.infrastructure.gpu_probe import GPUProber
 from egx.infrastructure.topology_builder import TopologyBuilder
 from egx.intelligence.strategy.selector import FibonacciHeap
-from egx.peft.lora import inject_lora, LoRAConfig, LoRAModel
+from egx.peft.lora import inject_lora
 from egx.training.kernel import TrainingKernel
 from egx.training.gradient_accumulation import GradientAccumulator
 from egx.resilience.watchdog import TrainingWatchdog
@@ -38,13 +37,9 @@ from egx.core.interfaces import (
     BaseGPUProber,
     BaseTopologyBuilder,
     BaseStrategySelector,
-    BaseCheckpointManager,
-    BaseWatchdog,
 )
 from egx.api.config import EGXConfig, TrainingSessionConfig
 from egx.api.validation import ModelValidator
-from egx.core.exceptions import HardwareError
-from egx.monitoring import MemoryProfiler
 
 logger = logging.getLogger("egx.runtime.engine")
 
@@ -233,7 +228,6 @@ class EGXEngine(BaseEngine):
         # ── Phase 8: Kernel Setup ──
         # Grad Accumulation Setup
         accumulator = GradientAccumulator(session_config.gradient_accumulation_steps)
-        loss_scale = accumulator.get_scale()
 
         # Build Watchdog
         watchdog = TrainingWatchdog(timeout_s=session_config.timeout)

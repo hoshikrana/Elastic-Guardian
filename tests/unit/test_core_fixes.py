@@ -9,10 +9,8 @@ Tests for:
 """
 
 import pytest
-import asyncio
 import torch
 import torch.nn as nn
-from unittest.mock import Mock, patch, MagicMock
 
 from egx.resilience.recovery.orchestrator import (
     RecoveryOrchestrator,
@@ -26,17 +24,14 @@ from egx.core.models import (
     HardwareTopology,
     ModelProfile,
     TrainingPlan,
-    MemoryReport,
 )
 from egx.core.enums import (
     TrainingMode,
     DType,
     OptimizerType,
     ParallelStrategy,
-    DeviceType,
     ArchType,
     InterconnectType,
-    HardwareTier,
 )
 from egx.intelligence.estimator.improved_analytical import ImprovedAnalyticalEstimator
 

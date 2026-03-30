@@ -14,7 +14,6 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from egx.core.exceptions import EGXError, OutOfMemoryError
-from egx.core.enums import RecoveryState
 
 logger = logging.getLogger("egx.resilience.recovery")
 

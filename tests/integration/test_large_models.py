@@ -10,17 +10,12 @@ Tests the framework with realistic large models (7B+):
 """
 
 import pytest
-import torch
-import torch.nn as nn
-from pathlib import Path
-from typing import Optional, Tuple
 import logging
 
 from egx.core.models import (
     HardwareTopology,
     ModelProfile,
     TrainingPlan,
-    MemoryReport,
 )
 from egx.core.enums import (
     TrainingMode,
@@ -29,11 +24,10 @@ from egx.core.enums import (
     OptimizerType,
     ParallelStrategy,
     InterconnectType,
-    HardwareTier,
 )
 from egx.intelligence.estimator.improved_analytical import ImprovedAnalyticalEstimator
 from egx.resilience.recovery.orchestrator import RecoveryOrchestrator, RecoveryContext
-from egx.core.exceptions import OutOfMemoryError, EGXError
+from egx.core.exceptions import OutOfMemoryError
 
 logger = logging.getLogger(__name__)
 
@@ -424,7 +418,7 @@ class TestRecoveryWithLargeModels:
         # (Orchestrator determines strategy including batch halving)
         success = await orchestrator.recover(context)
         assert success is True
-        logger.info(f"Recovery strategy determined for batch size reduction")
+        logger.info("Recovery strategy determined for batch size reduction")
 
     @pytest.mark.asyncio
     async def test_recovery_max_retries_exceeded(self):

@@ -18,9 +18,7 @@ Usage:
 import argparse
 import subprocess
 import sys
-import json
-from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict
 import logging
 
 logging.basicConfig(

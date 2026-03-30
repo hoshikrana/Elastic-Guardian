@@ -6,13 +6,12 @@ Detects disk speeds for planning.
 
 from __future__ import annotations
 
-import math
 import os
 import pathlib
 import shutil
 import tempfile
 import time
-from typing import List, Tuple, Any, Optional, Tuple
+from typing import Optional, Tuple
 
 
 class NVMeProber:
@@ -30,7 +29,7 @@ class NVMeProber:
         if os.path.exists(self._temp_path):
             try:
                 os.remove(self._temp_path)
-            except:
+            except Exception:
                 pass
 
     def probe(self, path: Optional[str] = None) -> Tuple[float, float, int]:

@@ -10,8 +10,6 @@ Tests for the EGX monitoring system including:
 
 import pytest
 import time
-from unittest.mock import Mock, patch, MagicMock
-from pathlib import Path
 import json
 
 # These would import from egx package

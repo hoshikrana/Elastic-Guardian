@@ -11,7 +11,6 @@ Tests for the EGX telemetry system including:
 import pytest
 import time
 import json
-from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
 
 

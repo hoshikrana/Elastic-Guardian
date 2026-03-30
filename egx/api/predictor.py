@@ -12,7 +12,6 @@ import logging
 from typing import Any, Dict, List, Optional, Union
 
 from egx.core.device import get_default_device
-from egx.core.exceptions import EGXError
 
 try:
     import torch

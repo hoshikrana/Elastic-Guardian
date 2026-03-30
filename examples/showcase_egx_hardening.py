@@ -9,14 +9,13 @@ This script demonstrates the "next level" engineering patterns implemented in EG
 """
 
 import os
-import torch
 import torch.nn as nn
 import logging
 from egx.api.config import EGXConfig
 from egx.runtime.engine import EGXEngine
 from egx.resilience.checkpoint.writer import CheckpointWriter
 from egx.monitoring.telemetry import TelemetryService
-from egx.core.exceptions import BoolAsIntError, HardwareError
+from egx.core.exceptions import BoolAsIntError
 
 # Setup logging to see the "Senior Dev" style output
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")

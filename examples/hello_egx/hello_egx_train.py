@@ -8,7 +8,6 @@ portable script that runs on any machine (CPU or GPU).
 import os
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
 import logging
 
 from egx.api.config import EGXConfig

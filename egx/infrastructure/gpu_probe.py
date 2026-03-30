@@ -13,7 +13,7 @@ import pynvml
 import torch
 from typing import List, Tuple, Any
 from egx.core.device import get_default_device
-from egx.core.models import GPUSpec, HardwareTier
+from egx.core.models import GPUSpec
 from egx.core.interfaces import BaseGPUProber
 
 logger = logging.getLogger("egx.infrastructure.gpu")

@@ -19,7 +19,7 @@ class TestPEFTPipeline(unittest.TestCase):
         self.assertEqual(out.shape, (2, 64))
 
     def test_lora_reduces_trainable_params(self):
-        from egx.peft.lora import inject_lora, LoRALinear
+        from egx.peft.lora import inject_lora
         from tests.mocks.mock_model import ModelWithQProj
 
         model = ModelWithQProj()

@@ -17,7 +17,6 @@ import logging
 import torch
 
 from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModelForCausalLM
 
 from egx.api.trainer import EGXTrainer
 from egx.api.config import EGXConfig

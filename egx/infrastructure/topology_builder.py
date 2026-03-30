@@ -29,7 +29,7 @@ class TopologyBuilder(BaseTopologyBuilder):
 
             with NVMeProber() as prober:
                 nvme_read, nvme_write, nvme_capacity = prober.probe()
-        except Exception as e:
+        except Exception:
             nvme_read, nvme_write, nvme_capacity = 3.5, 2.5, 100 * 1024 * 1024 * 1024
 
         # PCIe Bandwidth Sample

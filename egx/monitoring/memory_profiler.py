@@ -11,9 +11,8 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Optional, Dict, List, Tuple
-from dataclasses import dataclass, field
-from collections import deque
+from typing import Optional, List
+from dataclasses import dataclass
 
 try:
     import torch
